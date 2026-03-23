@@ -3,826 +3,325 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0d0d0d">
+<meta name="theme-color" content="#0c0c0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>GymTrack — Tu rutina del día</title>
+<title>GymTrack</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
 <style>
-/* ── RESET & TOKENS ───────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0c0c0c;--surface:#141414;--surface2:#1c1c1c;--surface3:#242424;
+  --border:#272727;--border2:#333;
+  --accent:#c8f135;--accent-dim:#7fa010;--accent-glow:rgba(200,241,53,.1);
+  --blue:#7b8fff;--orange:#ff9a3c;
+  --text:#efefef;--text-mid:#999;--text-dim:#555;
+  --done-bg:#111a00;--done-border:#2b4400;--done-text:#6a9a00;
+  --danger:#ff4d4d;
+  --r:8px;--rs:5px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.5;overscroll-behavior:none}
+body{max-width:480px;margin:0 auto;position:relative}
 
-:root {
-  --bg:         #0c0c0c;
-  --surface:    #141414;
-  --surface2:   #1c1c1c;
-  --surface3:   #242424;
-  --border:     #272727;
-  --border2:    #333;
-  --accent:     #c8f135;
-  --accent-dim: #7fa010;
-  --accent-glow:rgba(200,241,53,.12);
-  --blue:       #7b8fff;
-  --orange:     #ff9a3c;
-  --text:       #efefef;
-  --text-mid:   #999;
-  --text-dim:   #555;
-  --done-bg:    #111a00;
-  --done-border:#2b4400;
-  --done-text:  #6a9a00;
-  --danger:     #ff4d4d;
-  --radius:     8px;
-  --radius-sm:  5px;
-}
+.view{display:none;min-height:100vh}
+.view.active{display:block}
 
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  line-height: 1.5;
-  overscroll-behavior: none;
-}
+/* ══ SETUP ══ */
+#setup-view{display:flex;flex-direction:column}
+.setup-hero{padding:44px 28px 28px;background:linear-gradient(180deg,#111 0%,var(--bg) 100%);border-bottom:1px solid var(--border)}
+.setup-logo{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:3px;color:var(--accent);line-height:1;margin-bottom:5px}
+.setup-logo span{color:var(--text-dim)}
+.setup-tagline{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px}
+.setup-body{padding:24px 22px 48px;flex:1}
 
-body {
-  max-width: 480px;
-  margin: 0 auto;
-  position: relative;
-}
+.resume-banner{background:var(--surface);border:1px solid var(--done-border);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;cursor:pointer;transition:border-color .15s}
+.resume-banner:active{border-color:var(--accent-dim)}
+.resume-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--done-text);margin-bottom:4px}
+.resume-name{font-weight:600;font-size:15px;margin-bottom:2px}
+.resume-meta{font-size:12px;color:var(--text-mid)}
 
-/* ── VIEWS ───────────────────────────────────────────────────────────────── */
-.view { display: none; min-height: 100vh; }
-.view.active { display: block; }
+.tab-row{display:flex;border:1px solid var(--border2);border-radius:var(--rs);overflow:hidden;margin-bottom:22px}
+.tab-btn{flex:1;padding:10px 8px;background:transparent;border:none;border-right:1px solid var(--border2);color:var(--text-dim);font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;transition:all .15s}
+.tab-btn:last-child{border-right:none}
+.tab-btn.active{background:var(--accent);color:#000;font-weight:600}
 
-/* ── SETUP SCREEN ────────────────────────────────────────────────────────── */
-#setup-view {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  padding: 0 0 32px;
-}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 
-.setup-hero {
-  padding: 48px 28px 32px;
-  background: linear-gradient(180deg, #111 0%, var(--bg) 100%);
-  border-bottom: 1px solid var(--border);
-}
+/* paste tab */
+.paste-label{font-weight:600;font-size:15px;margin-bottom:4px}
+.paste-sub{font-size:13px;color:var(--text-mid);margin-bottom:12px;line-height:1.5}
+.msg-textarea{width:100%;min-height:200px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:12px 14px;resize:vertical;outline:none;line-height:1.6;transition:border-color .15s}
+.msg-textarea:focus{border-color:var(--accent)}
+.msg-textarea::placeholder{color:var(--text-dim)}
+.parse-btn{width:100%;padding:14px;background:var(--accent);border:none;border-radius:var(--rs);color:#000;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:12px;transition:opacity .15s}
+.parse-btn:active{opacity:.8}
+.parse-result{margin-top:10px;font-family:'DM Mono',monospace;font-size:12px;min-height:18px;text-align:center}
+.parse-result.ok{color:var(--accent)}
+.parse-result.warn{color:var(--orange)}
+.parse-result.error{color:var(--danger)}
 
-.setup-logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 42px;
-  letter-spacing: 3px;
-  color: var(--accent);
-  line-height: 1;
-  margin-bottom: 6px;
-}
-.setup-logo span { color: var(--text-dim); }
+.preview-wrap{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:none}
+.preview-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.preview-title{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-mid)}
+.preview-edit-btn{background:transparent;border:1px solid var(--border2);border-radius:3px;color:var(--text-dim);font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;cursor:pointer;text-transform:uppercase}
+.preview-list{padding:8px 14px 12px;max-height:220px;overflow-y:auto}
+.prev-ex{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.prev-ex:last-child{border-bottom:none}
+.prev-ex-n{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--text-dim);flex-shrink:0;width:18px}
+.prev-ex-name{flex:1;font-size:13px;font-weight:500}
+.prev-ex-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);flex-shrink:0}
+.preview-start{width:100%;padding:13px;background:var(--accent);border:none;border-radius:0 0 var(--r) var(--r);color:#000;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer}
 
-.setup-tagline {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
+/* manual tab */
+.mf-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.mf-input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 12px;outline:none;transition:border-color .15s}
+.mf-input:focus{border-color:var(--accent)}
+.mf-input::placeholder{color:var(--text-dim)}
+.mf-row{display:flex;gap:8px}
+.mf-group{flex:1}
+.mf-stack{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 
-.setup-body { padding: 28px 24px; flex: 1; }
+.add-ex-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.add-ex-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.add-ex-fields{display:flex;flex-direction:column;gap:8px}
+.add-ex-btn{width:100%;padding:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text-mid);font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .15s;margin-top:4px}
+.add-ex-btn:active{border-color:var(--accent-dim);color:var(--accent-dim)}
 
-.setup-step {
-  margin-bottom: 28px;
-}
+.builder-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.builder-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;display:flex;align-items:center;gap:8px}
+.builder-info{flex:1;min-width:0}
+.builder-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.builder-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);margin-top:2px}
+.builder-del{background:transparent;border:1px solid var(--border2);border-radius:3px;color:var(--text-dim);font-size:12px;padding:3px 7px;cursor:pointer;flex-shrink:0}
+.builder-del:active{border-color:var(--danger);color:var(--danger)}
 
-.step-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--accent-dim);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 8px;
-}
+.start-manual-btn{width:100%;padding:13px;background:var(--accent);border:none;border-radius:var(--rs);color:#000;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer}
+.start-manual-btn:disabled{opacity:.4;cursor:not-allowed}
 
-.step-label {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--text);
-  margin-bottom: 4px;
-}
+/* ══ TRACKER ══ */
+#tracker-view{padding-bottom:90px}
+.t-header{padding:14px 20px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
+.t-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.t-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--accent);line-height:1;cursor:pointer;flex-shrink:0}
+.t-logo span{color:var(--text-dim)}
+.t-sname{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.8px;flex:1;text-align:center;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-prog-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);text-align:right;flex-shrink:0}
+.t-prog-lbl strong{color:var(--accent);font-size:18px;display:block;line-height:1}
+.prog-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
 
-.step-sub {
-  font-size: 13px;
-  color: var(--text-mid);
-  margin-bottom: 12px;
-  line-height: 1.5;
-}
+.sess-banner{margin:12px 20px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.sess-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;line-height:1;margin-bottom:5px}
+.sess-chips{display:flex;gap:6px;flex-wrap:wrap}
+.sess-chip{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:3px;background:var(--surface2);border:1px solid var(--border2);color:var(--text-mid)}
+.sess-notes{font-size:12px;color:var(--text-dim);font-style:italic;line-height:1.5;border-top:1px solid var(--border);padding-top:8px;margin-top:8px;cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sess-notes.exp{display:block}
 
-.api-input {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  padding: 11px 14px;
-  outline: none;
-  transition: border-color .15s;
-  letter-spacing: .5px;
-}
-.api-input:focus { border-color: var(--accent); }
-.api-input::placeholder { color: var(--text-dim); }
+.extra-block{margin:8px 20px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px}
+.extra-title{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:5px}
+.extra-text{font-size:12px;color:var(--text-mid);line-height:1.6}
 
-.api-note {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 7px;
-  font-style: italic;
-}
-.api-note a { color: var(--accent-dim); }
+.exs-wrap{padding:8px 20px 0}
+.sec-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);padding:12px 0 8px}
 
-.msg-textarea {
-  width: 100%;
-  min-height: 180px;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  padding: 12px 14px;
-  resize: vertical;
-  outline: none;
-  line-height: 1.6;
-  transition: border-color .15s;
-}
-.msg-textarea:focus { border-color: var(--accent); }
-.msg-textarea::placeholder { color: var(--text-dim); }
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden;transition:border-color .2s}
+.ex-card.done{background:var(--done-bg);border-color:var(--done-border)}
+.ex-head{display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer;user-select:none}
+.ex-num{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text-dim);flex-shrink:0;width:18px;text-align:center;line-height:1}
+.ex-card.done .ex-num{color:var(--done-text)}
+.check-ring{width:30px;height:30px;border-radius:50%;border:2px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:transparent;transition:all .2s}
+.ex-card.done .check-ring{background:var(--accent);border-color:var(--accent);color:#000}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-weight:600;font-size:14px;line-height:1.3;color:var(--text);margin-bottom:4px}
+.ex-card.done .ex-name{color:var(--done-text)}
+.ex-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:3px;font-weight:500;flex-shrink:0}
+.tag-s{background:#1e1e1e;color:var(--text-mid);border:1px solid #2a2a2a}
+.tag-r{background:#1a1a30;color:var(--blue);border:1px solid #2a2a50}
+.tag-w{background:#2a1a00;color:var(--orange);border:1px solid #4a3000}
+.ex-card.done .tag-s,.ex-card.done .tag-r,.ex-card.done .tag-w{background:var(--done-bg);color:var(--done-text);border-color:var(--done-border)}
+.ex-chevron{color:var(--text-dim);font-size:11px;flex-shrink:0;transition:transform .2s}
+.ex-card.open .ex-chevron{transform:rotate(180deg)}
 
-.parse-btn {
-  width: 100%;
-  padding: 14px;
-  background: var(--accent);
-  border: none;
-  border-radius: var(--radius-sm);
-  color: #000;
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: opacity .15s, transform .1s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.parse-btn:active { opacity: .8; transform: scale(.99); }
-.parse-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.ex-detail{display:none;padding:0 12px 14px;border-top:1px solid var(--border)}
+.ex-card.done .ex-detail{border-color:var(--done-border)}
+.ex-card.open .ex-detail{display:block}
+.det-block{padding-top:12px}
+.det-title{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px}
 
-.parse-status {
-  margin-top: 12px;
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  color: var(--text-dim);
-  text-align: center;
-  min-height: 18px;
-}
-.parse-status.error { color: var(--danger); }
-.parse-status.ok { color: var(--accent); }
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+.chip{background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-mid)}
+.chip strong{color:var(--text);font-weight:500}
 
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 24px 0;
-  color: var(--text-dim);
-  font-size: 11px;
-  font-family: 'DM Mono', monospace;
-}
-.divider::before, .divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
+.coach-note{background:var(--surface2);border-left:2px solid var(--accent-dim);padding:8px 10px;border-radius:0 4px 4px 0;font-size:12px;color:var(--text-mid);line-height:1.6;margin-top:8px;font-style:italic}
+.ex-card.done .coach-note{border-left-color:var(--done-border)}
 
-.manual-btn {
-  width: 100%;
-  padding: 12px;
-  background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-sm);
-  color: var(--text-mid);
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: border-color .15s, color .15s;
-}
-.manual-btn:hover { border-color: var(--accent-dim); color: var(--accent-dim); }
+.sets-grid{display:grid;grid-template-columns:22px 1fr 1fr 36px;gap:4px;align-items:center}
+.sg-h{font-family:'DM Mono',monospace;font-size:9px;color:var(--text-dim);text-align:center;padding-bottom:2px;text-transform:uppercase;letter-spacing:.5px}
+.sg-h:first-child{text-align:left}
+.sg-n{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim)}
+.sg-in{background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;font-weight:500;text-align:center;padding:7px 4px;width:100%;outline:none;transition:border-color .15s;-webkit-appearance:none}
+.sg-in:focus{border-color:var(--accent)}
+.sg-in.ok{background:#152000;border-color:#2b4000;color:var(--accent)}
+.sg-ok{background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);font-size:14px;padding:7px 4px;cursor:pointer;width:100%;line-height:1;transition:all .15s}
+.sg-ok.ok{background:var(--accent);border-color:var(--accent);color:#000}
 
-/* ── SPINNER ─────────────────────────────────────────────────────────────── */
-.spinner {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(0,0,0,.3);
-  border-top-color: #000;
-  border-radius: 50%;
-  animation: spin .6s linear infinite;
-  flex-shrink: 0;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+.ex-notes{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text-mid);font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 10px;resize:none;outline:none;min-height:46px;line-height:1.5}
+.ex-notes::placeholder{color:var(--text-dim)}
 
-/* ── TRACKER HEADER ──────────────────────────────────────────────────────── */
-#tracker-view { padding-bottom: 90px; }
+.rest-btn{width:100%;padding:9px;background:transparent;border:1px solid var(--border2);border-radius:4px;color:var(--text-mid);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:10px;transition:border-color .15s,color .15s}
+.rest-btn:active{border-color:var(--accent-dim);color:var(--accent-dim)}
+.ex-card.done .rest-btn{border-color:var(--done-border);color:var(--done-text)}
 
-.t-header {
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  z-index: 100;
-}
+/* rest timer */
+#rest-bar{display:none;position:fixed;bottom:76px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:440px;background:var(--surface);border:1px solid var(--accent);border-radius:var(--r);padding:10px 14px;z-index:300;align-items:center;gap:10px;box-shadow:0 0 24px var(--accent-glow)}
+#rest-bar.show{display:flex}
+.rt-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;flex-shrink:0}
+.rt-count{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);letter-spacing:1px;flex-shrink:0;min-width:40px;line-height:1}
+.rt-track{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.rt-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 1s linear}
+.rt-skip{background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'DM Mono',monospace;font-size:9px;padding:3px 7px;cursor:pointer;flex-shrink:0;text-transform:uppercase}
 
-.t-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
+/* bottom bar */
+.btm-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:1px solid var(--border);padding:10px 20px 20px;display:flex;gap:8px;z-index:200}
+.btm-btn{flex:1;padding:10px 8px;background:transparent;border:1px solid var(--border2);border-radius:var(--rs);color:var(--text-dim);font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;cursor:pointer}
+.btm-btn:active{opacity:.7}
+.btm-btn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;flex:1.5}
 
-.t-logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px;
-  letter-spacing: 2px;
-  color: var(--accent);
-  line-height: 1;
-  cursor: pointer;
-}
-.t-logo span { color: var(--text-dim); }
+/* finish */
+#finish-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:40px}
+#finish-overlay.show{display:flex}
+.fo-emoji{font-size:64px;margin-bottom:16px}
+.fo-title{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:2px;color:var(--accent);line-height:1;margin-bottom:8px}
+.fo-sub{font-family:'DM Mono',monospace;font-size:12px;color:var(--text-dim);margin-bottom:10px;line-height:1.6}
+.fo-stats{display:flex;gap:24px;margin:16px 0 32px;justify-content:center}
+.fo-stat{text-align:center}
+.fo-stat-n{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--text);line-height:1}
+.fo-stat-l{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.fo-btns{display:flex;gap:10px}
+.fo-btn{padding:11px 22px;background:transparent;border:1px solid var(--border2);border-radius:var(--rs);color:var(--text-mid);font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;cursor:pointer}
+.fo-btn.accent{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
 
-.t-day-title {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--text-mid);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  flex: 1;
-  text-align: center;
-  padding: 0 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* toast */
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:9px 18px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text-mid);z-index:900;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
 
-.t-progress-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--text-dim);
-  text-align: right;
-  flex-shrink: 0;
-}
-.t-progress-label strong { color: var(--accent); font-size: 18px; display: block; line-height: 1; }
-
-.progress-track {
-  height: 3px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 2px;
-  transition: width .4s ease;
-}
-
-/* ── SESSION INFO BANNER ─────────────────────────────────────────────────── */
-.session-banner {
-  margin: 14px 20px 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-}
-.session-name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px;
-  letter-spacing: 1px;
-  color: var(--text);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.session-meta {
-  font-size: 12px;
-  color: var(--text-mid);
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-.session-meta span { display: flex; align-items: center; gap: 4px; }
-.session-notes {
-  font-size: 12px;
-  color: var(--text-dim);
-  font-style: italic;
-  line-height: 1.5;
-  border-top: 1px solid var(--border);
-  padding-top: 8px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.session-notes.expanded {
-  display: block;
-  -webkit-line-clamp: unset;
-}
-
-/* ── WARMUP/COOLDOWN BLOCK ───────────────────────────────────────────────── */
-.extra-block {
-  margin: 10px 20px 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-}
-.extra-block-title {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-  margin-bottom: 6px;
-}
-.extra-block-text {
-  font-size: 12px;
-  color: var(--text-mid);
-  line-height: 1.6;
-}
-
-/* ── EXERCISES ───────────────────────────────────────────────────────────── */
-.exercises-wrap {
-  padding: 10px 20px 0;
-}
-
-.section-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--text-dim);
-  padding: 14px 0 8px;
-}
-
-.ex-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 8px;
-  overflow: hidden;
-  transition: border-color .2s;
-}
-.ex-card.done {
-  background: var(--done-bg);
-  border-color: var(--done-border);
-}
-
-.ex-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 12px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.ex-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 18px;
-  color: var(--text-dim);
-  flex-shrink: 0;
-  width: 20px;
-  text-align: center;
-  line-height: 1;
-}
-.ex-card.done .ex-num { color: var(--done-text); }
-
-.check-ring {
-  width: 30px; height: 30px;
-  border-radius: 50%;
-  border: 2px solid var(--border2);
-  background: transparent;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  font-size: 14px;
-  color: transparent;
-  transition: all .2s;
-}
-.ex-card.done .check-ring {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #000;
-}
-
-.ex-info { flex: 1; min-width: 0; }
-.ex-name {
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1.3;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.ex-card.done .ex-name { color: var(--done-text); }
-
-.ex-tags {
-  display: flex; gap: 4px; flex-wrap: wrap;
-}
-.tag {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 3px;
-  font-weight: 500;
-  flex-shrink: 0;
-}
-.tag-s  { background:#1e1e1e; color:var(--text-mid); border:1px solid #2a2a2a; }
-.tag-r  { background:#1a1a30; color:var(--blue);     border:1px solid #2a2a50; }
-.tag-w  { background:#2a1a00; color:var(--orange);   border:1px solid #4a3000; }
-.ex-card.done .tag-s,
-.ex-card.done .tag-r,
-.ex-card.done .tag-w { background:var(--done-bg); color:var(--done-text); border-color:var(--done-border); }
-
-.ex-chevron {
-  color: var(--text-dim); font-size: 11px; flex-shrink: 0;
-  transition: transform .2s;
-}
-.ex-card.open .ex-chevron { transform: rotate(180deg); }
-
-/* ── EXERCISE DETAIL ─────────────────────────────────────────────────────── */
-.ex-detail {
-  display: none;
-  padding: 0 12px 14px;
-  border-top: 1px solid var(--border);
-}
-.ex-card.done .ex-detail { border-color: var(--done-border); }
-.ex-card.open .ex-detail { display: block; }
-
-.detail-block { padding-top: 12px; }
-.detail-title {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-  margin-bottom: 8px;
-}
-
-/* prescribed chips */
-.chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 4px; }
-.chip {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  padding: 4px 10px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--text-mid);
-}
-.chip strong { color: var(--text); font-weight: 500; }
-
-/* coach note */
-.coach-note {
-  background: var(--surface2);
-  border-left: 2px solid var(--accent-dim);
-  padding: 8px 10px;
-  border-radius: 0 4px 4px 0;
-  font-size: 12px;
-  color: var(--text-mid);
-  line-height: 1.6;
-  margin-top: 8px;
-  font-style: italic;
-}
-.ex-card.done .coach-note { border-left-color: var(--done-border); }
-
-/* sets grid */
-.sets-grid {
-  display: grid;
-  grid-template-columns: 22px 1fr 1fr 36px;
-  gap: 4px;
-  align-items: center;
-}
-.sg-head {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  color: var(--text-dim);
-  text-align: center;
-  padding-bottom: 2px;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-}
-.sg-head:first-child { text-align: left; }
-.sg-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--text-dim);
-}
-.sg-input {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text);
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  font-weight: 500;
-  text-align: center;
-  padding: 7px 4px;
-  width: 100%;
-  outline: none;
-  transition: border-color .15s;
-  -webkit-appearance: none;
-}
-.sg-input:focus { border-color: var(--accent); }
-.sg-input.ok { background:#152000; border-color:#2b4000; color:var(--accent); }
-
-.sg-confirm {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text-dim);
-  font-size: 14px;
-  padding: 7px 4px;
-  cursor: pointer;
-  width: 100%;
-  line-height: 1;
-  transition: all .15s;
-}
-.sg-confirm.ok { background: var(--accent); border-color: var(--accent); color: #000; }
-
-/* notes */
-.ex-notes {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text-mid);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  padding: 8px 10px;
-  resize: none;
-  outline: none;
-  min-height: 48px;
-  line-height: 1.5;
-}
-.ex-notes::placeholder { color: var(--text-dim); }
-
-/* rest btn */
-.rest-btn {
-  width: 100%;
-  padding: 9px;
-  background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  color: var(--text-mid);
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: border-color .15s, color .15s;
-}
-.rest-btn:hover { border-color: var(--accent-dim); color: var(--accent-dim); }
-.ex-card.done .rest-btn { border-color: var(--done-border); color: var(--done-text); }
-
-/* ── REST TIMER ──────────────────────────────────────────────────────────── */
-#rest-bar {
-  display: none;
-  position: fixed;
-  bottom: 76px;
-  left: 50%; transform: translateX(-50%);
-  width: calc(100% - 40px);
-  max-width: 440px;
-  background: var(--surface);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  z-index: 300;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 0 24px var(--accent-glow);
-}
-#rest-bar.show { display: flex; }
-.rt-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); text-transform:uppercase; flex-shrink:0; }
-.rt-count { font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--accent); letter-spacing:1px; flex-shrink:0; min-width:40px; line-height:1; }
-.rt-track { flex:1; height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
-.rt-fill  { height:100%; background:var(--accent); border-radius:2px; transition:width 1s linear; }
-.rt-skip  { background:transparent; border:1px solid var(--border); border-radius:3px; color:var(--text-dim); font-family:'DM Mono',monospace; font-size:9px; padding:3px 7px; cursor:pointer; flex-shrink:0; text-transform:uppercase; }
-
-/* ── BOTTOM BAR ──────────────────────────────────────────────────────────── */
-.bottom-bar {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: 10px 20px 20px;
-  display: flex; gap: 8px;
-  z-index: 200;
-}
-.bar-btn {
-  flex: 1; padding: 10px 8px;
-  background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-sm);
-  color: var(--text-dim);
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .8px;
-  cursor: pointer;
-  transition: all .15s;
-}
-.bar-btn:active { opacity: .7; }
-.bar-btn.primary {
-  background: var(--accent); color: #000;
-  border-color: var(--accent); font-weight: 600;
-  flex: 1.5;
-}
-
-/* ── FINISH OVERLAY ──────────────────────────────────────────────────────── */
-#finish-overlay {
-  display: none;
-  position: fixed; inset: 0;
-  background: var(--bg);
-  z-index: 600;
-  align-items: center; justify-content: center;
-  flex-direction: column;
-  text-align: center; padding: 40px;
-}
-#finish-overlay.show { display: flex; }
-.fo-emoji { font-size: 64px; margin-bottom: 16px; }
-.fo-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 56px; letter-spacing: 2px;
-  color: var(--accent); line-height: 1; margin-bottom: 8px;
-}
-.fo-sub {
-  font-family: 'DM Mono', monospace;
-  font-size: 12px; color: var(--text-dim);
-  margin-bottom: 10px; line-height: 1.6;
-}
-.fo-stats {
-  display: flex; gap: 20px; margin: 16px 0 32px;
-  justify-content: center;
-}
-.fo-stat { text-align: center; }
-.fo-stat-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 36px; color: var(--text); line-height: 1;
-}
-.fo-stat-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px; color: var(--text-dim);
-  text-transform: uppercase; letter-spacing: 1px;
-}
-.fo-close {
-  padding: 11px 28px;
-  background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-sm);
-  color: var(--text-mid);
-  font-family: 'DM Mono', monospace;
-  font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
-  cursor: pointer;
-}
-
-/* ── ADD EXERCISE MODAL ──────────────────────────────────────────────────── */
-#add-modal {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.88);
-  z-index: 500; align-items: flex-end;
-}
-#add-modal.show { display: flex; }
-.modal-box {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-bottom: none;
-  border-radius: 14px 14px 0 0;
-  width: 100%; max-width: 480px; margin: 0 auto;
-  padding: 22px 22px 40px;
-  animation: slideUp .22s ease;
-}
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal-head {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-}
-.modal-title { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px; }
-.modal-close {
-  background:transparent; border:1px solid var(--border); border-radius:4px;
-  color:var(--text-dim); font-size:13px; padding:2px 8px; cursor:pointer;
-}
-.mform { display:flex; flex-direction:column; gap:10px; }
-.mform-row { display:flex; gap:8px; }
-.mform-group { flex:1; }
-.mform-label { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
-.mform-input {
-  width:100%; background:var(--surface2); border:1px solid var(--border2);
-  border-radius:4px; color:var(--text); font-family:'DM Sans',sans-serif;
-  font-size:14px; padding:9px 11px; outline:none; transition:border-color .15s;
-}
-.mform-input:focus { border-color:var(--accent); }
-.mform-input::placeholder { color:var(--text-dim); }
-.mform-add {
-  width:100%; padding:12px;
-  background:var(--accent); border:none; border-radius:4px;
-  color:#000; font-family:'DM Mono',monospace; font-size:12px;
-  font-weight:600; letter-spacing:1.5px; text-transform:uppercase;
-  cursor:pointer; margin-top:4px;
-}
-
-/* ── TOAST ───────────────────────────────────────────────────────────────── */
-#toast {
-  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: 6px; padding: 9px 18px;
-  font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-mid);
-  z-index: 900; opacity: 0; transition: opacity .2s;
-  pointer-events: none; white-space: nowrap;
-}
-#toast.show { opacity: 1; }
-
-/* ── MISC ─────────────────────────────────────────────────────────────────── */
-input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
-textarea { -webkit-appearance: none; }
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+textarea{-webkit-appearance:none}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 </style>
 </head>
 <body>
 
-<!-- ── SETUP VIEW ─────────────────────────────────────────────────────────── -->
+<!-- ══ SETUP ══ -->
 <div id="setup-view" class="view active">
   <div class="setup-hero">
     <div class="setup-logo">Gym<span>Track</span></div>
-    <div class="setup-tagline">Pega el mensaje de tu nutrióloga → entrena</div>
+    <div class="setup-tagline">Sin cuenta · Sin API · Solo el gym</div>
   </div>
-
   <div class="setup-body">
 
-    <div class="setup-step">
-      <div class="step-num">Paso 1 · API Key</div>
-      <div class="step-label">Tu clave de Anthropic</div>
-      <div class="step-sub">Se guarda solo en tu dispositivo (localStorage). Nunca sale a ningún servidor externo.</div>
-      <input class="api-input" id="api-key-input" type="password"
-        placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
-      <div class="api-note">Obtén tu key gratis en <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
+    <div id="resume-banner" class="resume-banner" style="display:none" onclick="resumeSession()">
+      <div class="resume-label">↩ Continuar sesión guardada</div>
+      <div class="resume-name" id="resume-name">—</div>
+      <div class="resume-meta" id="resume-meta">—</div>
     </div>
 
-    <div class="setup-step">
-      <div class="step-num">Paso 2 · Mensaje de WhatsApp</div>
-      <div class="step-label">Pega la rutina del día</div>
-      <div class="step-sub">El mensaje completo tal como te lo manda tu nutrióloga.</div>
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('paste')">📋 Pegar mensaje</button>
+      <button class="tab-btn"        onclick="switchTab('manual')">✏️ Manual</button>
+    </div>
+
+    <!-- PASTE TAB -->
+    <div id="tab-paste" class="tab-panel active">
+      <div class="paste-label">Pega el mensaje de WhatsApp</div>
+      <div class="paste-sub">El parser detecta ejercicios, series, reps, pesos y notas técnicas automáticamente sin ninguna API.</div>
       <textarea class="msg-textarea" id="msg-input"
-        placeholder="🍽️ Rutina HOY LUNES 23 – Día 1: Pecho + Tríceps&#10;⏰ Entrenamiento: ~45-55 min&#10;&#10;1. Press banca | 4 series × 8-12 reps&#10;   💪 Recomendado: 35-40 kg&#10;..."></textarea>
-    </div>
+        placeholder="🍽️ Rutina HOY LUNES 23 – Día 1: Pecho + Tríceps&#10;⏰ ~45-55 min&#10;Notas: Técnica primero. Descansos 90-120 s compuestos.&#10;&#10;1. Press banca (máquina o barra) | 4 series × 8-12 reps&#10;   💪 Recomendado: 35-40 kg&#10;   📝 Baja controlado hasta pecho, codos ~45°...&#10;&#10;2. Press inclinado | 3 series × 10-12 reps&#10;   💪 Recomendado: 12.5-15 kg por mancuerna&#10;..."></textarea>
+      <button class="parse-btn" onclick="parseAndPreview()">⚡ Parsear rutina</button>
+      <div class="parse-result" id="parse-result"></div>
 
-    <button class="parse-btn" id="parse-btn" onclick="parseRoutine()">
-      <span id="parse-btn-text">⚡ Cargar rutina</span>
-    </button>
-    <div class="parse-status" id="parse-status"></div>
-
-    <div class="divider">o</div>
-
-    <button class="manual-btn" onclick="loadDemo()">Usar rutina de ejemplo</button>
-
-  </div>
-</div>
-
-<!-- ── TRACKER VIEW ───────────────────────────────────────────────────────── -->
-<div id="tracker-view" class="view">
-
-  <div class="t-header">
-    <div class="t-header-row">
-      <div class="t-logo" onclick="goSetup()">Gym<span>Track</span></div>
-      <div class="t-day-title" id="t-day-title">—</div>
-      <div class="t-progress-label">
-        <strong id="t-done">0</strong>
-        <span id="t-total">/ 0</span>
+      <div class="preview-wrap" id="preview-wrap">
+        <div class="preview-head">
+          <div class="preview-title" id="preview-title">Rutina detectada</div>
+          <button class="preview-edit-btn" onclick="goEditParsed()">✏️ Editar</button>
+        </div>
+        <div class="preview-list" id="preview-list"></div>
+        <button class="preview-start" onclick="startFromParsed()">Empezar entrenamiento →</button>
       </div>
     </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="t-progress" style="width:0%"></div>
+
+    <!-- MANUAL TAB -->
+    <div id="tab-manual" class="tab-panel">
+      <div class="mf-stack">
+        <div>
+          <div class="mf-label">Nombre de la sesión</div>
+          <input class="mf-input" id="m-sname" type="text" placeholder="Día 1: Pecho + Tríceps">
+        </div>
+        <div class="mf-row">
+          <div class="mf-group">
+            <div class="mf-label">Músculos</div>
+            <input class="mf-input" id="m-muscle" type="text" placeholder="Pecho, Tríceps">
+          </div>
+          <div class="mf-group">
+            <div class="mf-label">Duración</div>
+            <input class="mf-input" id="m-dur" type="text" placeholder="45-55 min">
+          </div>
+        </div>
+        <div>
+          <div class="mf-label">Notas generales (opcional)</div>
+          <input class="mf-input" id="m-notes" type="text" placeholder="Técnica primero, descansos 90s...">
+        </div>
+      </div>
+
+      <div class="add-ex-box">
+        <div class="add-ex-title">Agregar ejercicio</div>
+        <div class="add-ex-fields">
+          <div>
+            <div class="mf-label">Nombre</div>
+            <input class="mf-input" id="ae-name" type="text" placeholder="Press banca plano">
+          </div>
+          <div class="mf-row">
+            <div class="mf-group"><div class="mf-label">Series</div><input class="mf-input" id="ae-sets" type="number" placeholder="4" min="1" max="10"></div>
+            <div class="mf-group"><div class="mf-label">Reps</div><input class="mf-input" id="ae-reps" type="text" placeholder="8-12"></div>
+            <div class="mf-group"><div class="mf-label">Peso</div><input class="mf-input" id="ae-weight" type="text" placeholder="40 kg"></div>
+          </div>
+          <div class="mf-row">
+            <div class="mf-group"><div class="mf-label">Músculo</div><input class="mf-input" id="ae-muscle" type="text" placeholder="Pecho"></div>
+            <div class="mf-group"><div class="mf-label">Descanso (seg)</div><input class="mf-input" id="ae-rest" type="number" placeholder="90"></div>
+          </div>
+          <div>
+            <div class="mf-label">Nota técnica (opcional)</div>
+            <input class="mf-input" id="ae-note" type="text" placeholder="Codos a 45°, baja lento...">
+          </div>
+          <button class="add-ex-btn" onclick="addManualEx()">+ Agregar ejercicio</button>
+        </div>
+      </div>
+
+      <div class="builder-list" id="builder-list"></div>
+      <button class="start-manual-btn" id="start-manual-btn" onclick="startManual()" disabled>Empezar entrenamiento →</button>
     </div>
   </div>
-
-  <div id="tracker-body"></div>
-
 </div>
 
-<!-- ── REST TIMER ─────────────────────────────────────────────────────────── -->
+<!-- ══ TRACKER ══ -->
+<div id="tracker-view" class="view">
+  <div class="t-header">
+    <div class="t-header-row">
+      <div class="t-logo" onclick="backToSetup()">Gym<span>Track</span></div>
+      <div class="t-sname" id="t-sname">—</div>
+      <div class="t-prog-lbl"><strong id="t-done">0</strong><span id="t-total">/ 0</span></div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="t-prog" style="width:0%"></div></div>
+  </div>
+  <div id="tracker-body"></div>
+</div>
+
+<!-- rest timer -->
 <div id="rest-bar">
   <div class="rt-label">Descanso</div>
   <div class="rt-count" id="rt-count">60</div>
@@ -830,549 +329,407 @@ textarea { -webkit-appearance: none; }
   <button class="rt-skip" onclick="stopTimer()">Skip ✕</button>
 </div>
 
-<!-- ── BOTTOM BAR ─────────────────────────────────────────────────────────── -->
-<div class="bottom-bar" id="bottom-bar" style="display:none">
-  <button class="bar-btn" onclick="openAdd()">+ Ejercicio</button>
-  <button class="bar-btn" onclick="newRoutine()">Nueva rutina</button>
-  <button class="bar-btn primary" onclick="finishSession()">Finalizar →</button>
+<!-- bottom bar -->
+<div class="btm-bar" id="btm-bar" style="display:none">
+  <button class="btm-btn" onclick="backToSetup()">← Rutina</button>
+  <button class="btm-btn primary" onclick="finishSession()">Finalizar →</button>
 </div>
 
-<!-- ── ADD MODAL ──────────────────────────────────────────────────────────── -->
-<div id="add-modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <div class="modal-title">Agregar ejercicio</div>
-      <button class="modal-close" onclick="closeAdd()">✕</button>
-    </div>
-    <div class="mform">
-      <div>
-        <div class="mform-label">Nombre</div>
-        <input class="mform-input" id="m-name" type="text" placeholder="Press banca plano">
-      </div>
-      <div class="mform-row">
-        <div class="mform-group">
-          <div class="mform-label">Series</div>
-          <input class="mform-input" id="m-sets" type="number" placeholder="3" min="1" max="10">
-        </div>
-        <div class="mform-group">
-          <div class="mform-label">Reps</div>
-          <input class="mform-input" id="m-reps" type="text" placeholder="10-12">
-        </div>
-        <div class="mform-group">
-          <div class="mform-label">Peso (kg)</div>
-          <input class="mform-input" id="m-weight" type="text" placeholder="40">
-        </div>
-      </div>
-      <div class="mform-row">
-        <div class="mform-group">
-          <div class="mform-label">Músculo</div>
-          <input class="mform-input" id="m-muscle" type="text" placeholder="Pecho">
-        </div>
-        <div class="mform-group">
-          <div class="mform-label">Descanso (seg)</div>
-          <input class="mform-input" id="m-rest" type="number" placeholder="90">
-        </div>
-      </div>
-      <button class="mform-add" onclick="addManual()">Agregar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── FINISH OVERLAY ─────────────────────────────────────────────────────── -->
+<!-- finish overlay -->
 <div id="finish-overlay">
   <div class="fo-emoji">💪</div>
   <div class="fo-title">Sesión<br>Completada</div>
   <div class="fo-sub" id="fo-sub"></div>
   <div class="fo-stats">
-    <div class="fo-stat">
-      <div class="fo-stat-num" id="fo-done">0</div>
-      <div class="fo-stat-label">Ejercicios</div>
-    </div>
-    <div class="fo-stat">
-      <div class="fo-stat-num" id="fo-sets">0</div>
-      <div class="fo-stat-label">Series</div>
-    </div>
+    <div class="fo-stat"><div class="fo-stat-n" id="fo-done">0</div><div class="fo-stat-l">Ejercicios</div></div>
+    <div class="fo-stat"><div class="fo-stat-n" id="fo-sets">0</div><div class="fo-stat-l">Series ✓</div></div>
   </div>
-  <button class="fo-close" onclick="closeFinish()">Cerrar</button>
+  <div class="fo-btns">
+    <button class="fo-btn" onclick="closeFinish()">Cerrar</button>
+    <button class="fo-btn accent" onclick="newRoutine()">Nueva rutina</button>
+  </div>
 </div>
 
-<!-- ── TOAST ──────────────────────────────────────────────────────────────── -->
 <div id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════════════════════════════════════ */
-const STORAGE_KEY = 'gymtrack_v2';
-let session = null;       // { name, date, muscle, duration, warmup, cooldown, finalNotes, exercises[] }
-let openEx = null;        // id of expanded exercise
-let timerInt = null;
-let timerSec = 0, timerTotal = 0;
+/* ── STATE ── */
+const SK = 'gymtrack_v3';
+let session   = null;
+let openEx    = null;
+let parsedBuf = null;
+let manualExs = [];
+let timerInt  = null, timerSec = 0, timerTotal = 0;
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PERSISTENCE
-═══════════════════════════════════════════════════════════════════════════ */
-function save() {
-  if (session) localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-}
-function loadSaved() {
-  try {
-    const s = localStorage.getItem(STORAGE_KEY);
-    if (s) { session = JSON.parse(s); return true; }
-  } catch(e) {}
+/* ── PERSIST ── */
+function save(){ if(session) localStorage.setItem(SK, JSON.stringify(session)); }
+function loadSaved(){
+  try{ const s=localStorage.getItem(SK); if(s){ session=JSON.parse(s); return true; } }catch(e){}
   return false;
 }
-function saveApiKey(k) { localStorage.setItem('gymtrack_apikey', k); }
-function loadApiKey() { return localStorage.getItem('gymtrack_apikey') || ''; }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PARSE via Claude API
-═══════════════════════════════════════════════════════════════════════════ */
-async function parseRoutine() {
-  const apiKey = document.getElementById('api-key-input').value.trim();
-  const msg    = document.getElementById('msg-input').value.trim();
+/* ════════════════════════════════════════
+   PARSER REGEX
+   Diseñado para el formato exacto de tu nutrióloga
+════════════════════════════════════════ */
+function parseMessage(txt){
+  const lines = txt.split('\n').map(l=>l.trim()).filter(Boolean);
+  const r = { name:'', date:'', muscle:'', duration:'', warmup:null, cooldown:null, generalNotes:null, finalNotes:null, exercises:[] };
 
-  if (!apiKey) { setStatus('Ingresa tu API key primero', 'error'); return; }
-  if (!msg)    { setStatus('Pega el mensaje de WhatsApp', 'error'); return; }
-
-  saveApiKey(apiKey);
-  setBtnLoading(true);
-  setStatus('Procesando con IA…');
-
-  const SYSTEM = `Eres un extractor de rutinas de gym. Dado un mensaje de WhatsApp de una nutrióloga/entrenadora, extrae la información y devuelve ÚNICAMENTE un objeto JSON válido, sin markdown, sin explicaciones, sin backticks.
-
-El JSON debe tener esta estructura exacta:
-{
-  "name": "string — nombre del día ej: Día 1: Pecho + Tríceps",
-  "date": "string — fecha si aparece ej: Lunes 23",
-  "muscle": "string — grupos musculares principales",
-  "duration": "string — duración estimada ej: 45-55 min",
-  "warmup": "string — descripción del calentamiento, o null",
-  "cooldown": "string — descripción del enfriamiento, o null",
-  "generalNotes": "string — notas generales de la sesión, o null",
-  "finalNotes": "string — notas finales / recomendaciones post-entreno, o null",
-  "exercises": [
-    {
-      "id": number único empezando en 1,
-      "name": "string — nombre del ejercicio",
-      "muscle": "string — músculo principal",
-      "sets": number,
-      "reps": "string ej: 8-12 o 12-15",
-      "weight": "string — peso recomendado ej: 35-40 kg o 12.5-15 kg por mancuerna",
-      "rest": number — segundos de descanso estimados (90 si no especifica),
-      "coachNote": "string — indicación técnica del entrenador, o null"
-    }
-  ]
-}
-
-Reglas:
-- Ignora secciones de calentamiento y enfriamiento como ejercicios; ponlos en warmup/cooldown.
-- Si hay un rango de peso (ej: 35-40 kg), pon el valor del medio como referencia en el campo weight como string.
-- Extrae el descanso en segundos: "90-120 s compuestos" → 105, "60-90 s aislados" → 75.
-- Si no hay información para un campo, usa null.
-- Devuelve SOLO el JSON, nada más.`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        system: SYSTEM,
-        messages: [{ role: 'user', content: msg }]
-      })
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
-    const raw = data.content.find(b => b.type === 'text')?.text || '';
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-
-    session = buildSession(parsed);
-    save();
-    setStatus('✓ Rutina cargada', 'ok');
-    setTimeout(() => showTracker(), 600);
-
-  } catch(e) {
-    setStatus('Error: ' + e.message, 'error');
-  } finally {
-    setBtnLoading(false);
+  // Encabezado: "Rutina HOY LUNES 23 – Día 1: Pecho + Tríceps"
+  const hm = txt.match(/rutina\s+hoy\s+([^\n–—\-]+)[–—\-]+\s*(.+)/i)
+          || txt.match(/rutina\s+([^\n–—\-]+)[–—\-]+\s*(.+)/i);
+  if(hm){ r.date = hm[1].trim(); r.name = hm[2].trim(); }
+  else {
+    const dl = lines.find(l=>/día\s*\d+/i.test(l));
+    r.name = (dl||lines[0]||'Rutina').replace(/^[^a-záéíóúñA-Z]+/,'').trim();
   }
+
+  // Músculo desde nombre
+  const mm = r.name.match(/:\s*(.+)/);
+  if(mm) r.muscle = mm[1].trim();
+
+  // Duración
+  const dm = txt.match(/~?(\d+[-–]\d+|\d+)\s*min/i);
+  if(dm) r.duration = dm[0].replace('~','').trim();
+
+  // Notas generales
+  const nl = lines.find(l=>/^notas:/i.test(l));
+  if(nl) r.generalNotes = nl.replace(/^notas:\s*/i,'').trim();
+
+  // Calentamiento
+  const wi = lines.findIndex(l=>/calentamiento/i.test(l));
+  if(wi>-1){
+    const wl=[];
+    for(let i=wi+1;i<lines.length&&i<wi+5;i++){
+      if(/^\d+\./.test(lines[i])||/enfriamiento/i.test(lines[i])) break;
+      wl.push(lines[i].replace(/^[🔄📝⏰]\s*/,''));
+    }
+    if(wl.length) r.warmup = wl.join(' ');
+  }
+
+  // Enfriamiento
+  const ci = lines.findIndex(l=>/enfriamiento/i.test(l));
+  if(ci>-1){
+    const cl=[];
+    for(let i=ci+1;i<lines.length&&i<ci+4;i++){
+      if(/notas finales|\d+\./i.test(lines[i])) break;
+      cl.push(lines[i].replace(/^[🔄📝⏰]\s*/,''));
+    }
+    if(cl.length) r.cooldown = cl.join(' ');
+  }
+
+  // Notas finales
+  const fi = lines.findIndex(l=>/notas finales/i.test(l));
+  if(fi>-1){
+    r.finalNotes = lines.slice(fi+1).map(l=>l.replace(/^[-•]\s*/,'')).filter(Boolean).join(' · ');
+  }
+
+  // ── EJERCICIOS ──
+  // Línea de ejercicio: "N. Nombre | X series × Y-Z reps"
+  // Variantes: "×", "x", "X"
+  const exRe = /^(\d+)\.\s+(.+?)\s*\|\s*(\d+)\s*series?\s*[×xX]\s*([\d\-–]+(?:\s*reps?)?)/i;
+
+  let i=0;
+  while(i<lines.length){
+    const m=lines[i].match(exRe);
+    if(m){
+      const ex={
+        id:       parseInt(m[1]),
+        name:     m[2].trim(),
+        muscle:   inferMuscle(m[2], r.muscle),
+        sets:     parseInt(m[3]),
+        reps:     m[4].replace(/\s*reps?/i,'').trim(),
+        weight:   '',
+        rest:     inferRest(r.generalNotes, m[2]),
+        coachNote:null
+      };
+      let j=i+1;
+      while(j<lines.length && j<=i+3){
+        const nx=lines[j];
+        if(/^\d+\./.test(nx)) break;
+        if(/💪|recomendado/i.test(nx)){
+          const wm=nx.match(/:\s*(.+)/);
+          if(wm) ex.weight=wm[1].trim();
+        } else if(/📝/.test(nx)&&!/series ligeras/i.test(nx)){
+          ex.coachNote=nx.replace(/^📝\s*/,'').trim();
+        }
+        j++;
+      }
+      i=j;
+      r.exercises.push(ex);
+    } else { i++; }
+  }
+
+  return r;
 }
 
-function buildSession(parsed) {
+function inferMuscle(name, fallback){
+  const n=name.toLowerCase();
+  if(/pecho|banca|inclinado|apertura|fl[ey]|fondos/i.test(n)) return 'Pecho';
+  if(/tríceps|tricep|skull|francés|polea alta/i.test(n)) return 'Tríceps';
+  if(/bíceps|bicep|curl|martillo/i.test(n)) return 'Bíceps';
+  if(/espalda|jalón|jalon|remo|peso muerto|dominada/i.test(n)) return 'Espalda';
+  if(/pierna|sentadilla|prensa|femoral|cuádricep|isquio|pantorrilla/i.test(n)) return 'Pierna';
+  if(/hombro|press militar|elevación|lateral|deltoid/i.test(n)) return 'Hombro';
+  if(/abdomen|plancha|crunch|core/i.test(n)) return 'Core';
+  return fallback?.split(/[,+]/)[0]?.trim()||'General';
+}
+
+function inferRest(notes, name){
+  if(!notes) return 90;
+  const comp=/(\d+)[-–](\d+)\s*s?\s*compuestos?/i.exec(notes);
+  const isol=/(\d+)[-–](\d+)\s*s?\s*aislados?/i.exec(notes);
+  const isC=/press|peso muerto|sentadilla|remo|jalón|fondos|militar/i.test(name);
+  if(isC&&comp) return Math.round((+comp[1]+ +comp[2])/2);
+  if(!isC&&isol) return Math.round((+isol[1]+ +isol[2])/2);
+  return 90;
+}
+
+function buildSession(p){
   return {
-    name:         parsed.name        || 'Rutina de hoy',
-    date:         parsed.date        || new Date().toLocaleDateString('es-MX'),
-    muscle:       parsed.muscle      || '',
-    duration:     parsed.duration    || '',
-    warmup:       parsed.warmup      || null,
-    cooldown:     parsed.cooldown    || null,
-    generalNotes: parsed.generalNotes|| null,
-    finalNotes:   parsed.finalNotes  || null,
-    exercises: (parsed.exercises || []).map(ex => ({
-      ...ex,
-      done: false,
-      sets_data: Array.from({ length: ex.sets || 3 }, () => ({
-        reps:      ex.reps   || '',
-        weight:    ex.weight || '',
-        confirmed: false
-      })),
-      notes: ''
+    name:p.name||'Rutina', date:p.date||today(), muscle:p.muscle||'',
+    duration:p.duration||'', warmup:p.warmup||null, cooldown:p.cooldown||null,
+    generalNotes:p.generalNotes||null, finalNotes:p.finalNotes||null,
+    exercises:p.exercises.map(ex=>({
+      ...ex, done:false, notes:'',
+      sets_data:Array.from({length:ex.sets||3},()=>({reps:ex.reps||'',weight:ex.weight||'',confirmed:false}))
     }))
   };
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   DEMO DATA
-═══════════════════════════════════════════════════════════════════════════ */
-function loadDemo() {
-  session = buildSession({
-    name: 'Día 1: Pecho + Tríceps',
-    date: 'Lunes 23',
-    muscle: 'Pecho, Tríceps',
-    duration: '45-55 min',
-    warmup: '10 círculos hombros + 10 aperturas sin peso + 10 flexiones ligeras + 1.5-2 min caminata/bici. 1-2 series ligeras de press banca.',
-    cooldown: '2 min pecho (marco puerta) + 2 min tríceps (brazo detrás cabeza) + 1 min hombros + caminata suave.',
-    generalNotes: 'Contrae pecho fuerte arriba en cada rep. Tríceps: codos fijos, extensión completa. Descansos 90-120 s compuestos / 60-90 s aislados. Técnica primero.',
-    finalNotes: 'Come proteína + carbohidratos después (arrachera, huevos, arroz). Si reps fáciles → sube 2.5-5 kg.',
-    exercises: [
-      { id:1, name:'Press banca (máquina o barra)', muscle:'Pecho', sets:4, reps:'8-12', weight:'35-40 kg', rest:105, coachNote:'Baja controlado hasta pecho, codos ~45°, empuja explosivo contrayendo pectorales.' },
-      { id:2, name:'Press inclinado (máquina o mancuernas)', muscle:'Pecho', sets:3, reps:'10-12', weight:'35-40 kg / 12.5-15 kg x mancuerna', rest:90, coachNote:'Banco 30-45°, baja lento (3 seg), empuja en arco, contrae arriba fuerte.' },
-      { id:3, name:'Aperturas / Flyes (mancuernas o máquina)', muscle:'Pecho', sets:3, reps:'12-15', weight:'7.5-10 kg cada mano', rest:75, coachNote:'Arco amplio, estiramiento profundo en pecho, sube contrayendo como abrazando.' },
-      { id:4, name:'Fondos (máquina asistida)', muscle:'Tríceps', sets:3, reps:'10-12', weight:'Asistencia 80-90 kg', rest:90, coachNote:'Torso inclinado adelante (más pecho), baja profundo, sube explosivo.' },
-      { id:5, name:'Extensiones de tríceps en polea alta (cuerda)', muscle:'Tríceps', sets:3, reps:'12-15', weight:'17.5-20 kg', rest:75, coachNote:'Codos pegados y fijos, extiende completo, separa cuerda al final.' },
-      { id:6, name:'Press francés / Skull crushers', muscle:'Tríceps', sets:3, reps:'10-12', weight:'12.5-15 kg', rest:75, coachNote:'Baja hacia frente, codos fijos al techo, extiende explosivo.' }
-    ]
-  });
-  save();
-  showTracker();
+function today(){ return new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'}); }
+
+/* ── TABS ── */
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='paste')||(i===1&&t==='manual')));
+  document.getElementById('tab-paste').classList.toggle('active',t==='paste');
+  document.getElementById('tab-manual').classList.toggle('active',t==='manual');
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   VIEWS
-═══════════════════════════════════════════════════════════════════════════ */
-function showSetup() {
+/* ── PARSE & PREVIEW ── */
+function parseAndPreview(){
+  const txt=document.getElementById('msg-input').value.trim();
+  if(!txt){ setRes('Pega el mensaje primero','error'); return; }
+  parsedBuf=parseMessage(txt);
+  const exs=parsedBuf.exercises;
+  if(!exs.length){
+    setRes('No encontré ejercicios numerados (formato: "1. Nombre | X series × Y reps"). Usa la pestaña Manual.','warn');
+    document.getElementById('preview-wrap').style.display='none';
+    return;
+  }
+  setRes(`✓ ${exs.length} ejercicio${exs.length>1?'s':''} detectado${exs.length>1?'s':''}`, 'ok');
+  document.getElementById('preview-title').textContent=parsedBuf.name||'Rutina detectada';
+  document.getElementById('preview-list').innerHTML=exs.map((ex,i)=>`
+    <div class="prev-ex">
+      <div class="prev-ex-n">${i+1}</div>
+      <div class="prev-ex-name">${ex.name}</div>
+      <div class="prev-ex-meta">${ex.sets}×${ex.reps}${ex.weight?' · '+ex.weight:''}</div>
+    </div>`).join('');
+  document.getElementById('preview-wrap').style.display='block';
+}
+
+function setRes(msg,type=''){
+  const el=document.getElementById('parse-result');
+  el.textContent=msg; el.className='parse-result'+(type?' '+type:'');
+}
+
+function startFromParsed(){
+  if(!parsedBuf||!parsedBuf.exercises.length) return;
+  session=buildSession(parsedBuf); save(); showTracker();
+}
+
+function goEditParsed(){
+  if(!parsedBuf) return;
+  switchTab('manual');
+  document.getElementById('m-sname').value  = parsedBuf.name||'';
+  document.getElementById('m-muscle').value = parsedBuf.muscle||'';
+  document.getElementById('m-dur').value    = parsedBuf.duration||'';
+  document.getElementById('m-notes').value  = parsedBuf.generalNotes||'';
+  manualExs=parsedBuf.exercises.map(e=>({...e}));
+  renderBuilder();
+  toast('Ejercicios cargados para editar');
+}
+
+/* ── MANUAL ── */
+function addManualEx(){
+  const name=document.getElementById('ae-name').value.trim();
+  if(!name){ toast('Escribe el nombre'); return; }
+  manualExs.push({
+    id:Date.now(), name,
+    muscle: document.getElementById('ae-muscle').value.trim()||'General',
+    sets:   parseInt(document.getElementById('ae-sets').value)||3,
+    reps:   document.getElementById('ae-reps').value.trim()||'10-12',
+    weight: document.getElementById('ae-weight').value.trim()||'',
+    rest:   parseInt(document.getElementById('ae-rest').value)||90,
+    coachNote: document.getElementById('ae-note').value.trim()||null
+  });
+  ['ae-name','ae-muscle','ae-sets','ae-reps','ae-weight','ae-rest','ae-note'].forEach(id=>document.getElementById(id).value='');
+  renderBuilder();
+}
+function removeManualEx(id){ manualExs=manualExs.filter(e=>e.id!==id); renderBuilder(); }
+function renderBuilder(){
+  document.getElementById('builder-list').innerHTML=manualExs.map((ex,i)=>`
+    <div class="builder-item">
+      <div class="builder-info">
+        <div class="builder-name">${i+1}. ${ex.name}</div>
+        <div class="builder-meta">${ex.sets}×${ex.reps}${ex.weight?' · '+ex.weight:''} · ${ex.muscle}</div>
+      </div>
+      <button class="builder-del" onclick="removeManualEx(${ex.id})">✕</button>
+    </div>`).join('');
+  document.getElementById('start-manual-btn').disabled=!manualExs.length;
+}
+function startManual(){
+  if(!manualExs.length){ toast('Agrega al menos un ejercicio'); return; }
+  session=buildSession({
+    name:   document.getElementById('m-sname').value.trim()||'Mi rutina',
+    date:   today(),
+    muscle: document.getElementById('m-muscle').value.trim()||'',
+    duration:document.getElementById('m-dur').value.trim()||'',
+    generalNotes:document.getElementById('m-notes').value.trim()||null,
+    warmup:null,cooldown:null,finalNotes:null,
+    exercises:manualExs.map((e,i)=>({...e,id:i+1}))
+  });
+  save(); showTracker();
+}
+
+/* ── VIEWS ── */
+function showSetup(){
   document.getElementById('setup-view').classList.add('active');
   document.getElementById('tracker-view').classList.remove('active');
-  document.getElementById('bottom-bar').style.display = 'none';
-  // restore saved api key
-  const k = loadApiKey();
-  if (k) document.getElementById('api-key-input').value = k;
+  document.getElementById('btm-bar').style.display='none';
+  if(session){
+    const done=session.exercises.filter(e=>e.done).length;
+    document.getElementById('resume-banner').style.display='block';
+    document.getElementById('resume-name').textContent=session.name;
+    document.getElementById('resume-meta').textContent=`${done}/${session.exercises.length} ejercicios · ${session.date||''}`;
+  }
 }
-
-function showTracker() {
+function resumeSession(){ if(session) showTracker(); }
+function showTracker(){
   document.getElementById('setup-view').classList.remove('active');
   document.getElementById('tracker-view').classList.add('active');
-  document.getElementById('bottom-bar').style.display = 'flex';
-  openEx = null;
-  renderTracker();
+  document.getElementById('btm-bar').style.display='flex';
+  openEx=null; renderTracker();
+}
+function backToSetup(){ showSetup(); }
+function newRoutine(){
+  if(!confirm('¿Empezar nueva rutina? El progreso actual se perderá.')) return;
+  session=null; manualExs=[]; parsedBuf=null;
+  localStorage.removeItem(SK);
+  document.getElementById('msg-input').value='';
+  document.getElementById('parse-result').textContent='';
+  document.getElementById('preview-wrap').style.display='none';
+  renderBuilder(); closeFinish(); showSetup();
 }
 
-function goSetup() {
-  if (!confirm('¿Volver al inicio? Tu progreso guardado se mantiene.')) return;
-  showSetup();
-}
+/* ── RENDER TRACKER ── */
+function renderTracker(){
+  if(!session) return;
+  const done=session.exercises.filter(e=>e.done).length;
+  const total=session.exercises.length;
+  const pct=total?(done/total)*100:0;
+  document.getElementById('t-sname').textContent=session.muscle||session.name;
+  document.getElementById('t-done').textContent=done;
+  document.getElementById('t-total').textContent=`/ ${total}`;
+  document.getElementById('t-prog').style.width=pct+'%';
 
-function newRoutine() {
-  if (!confirm('¿Cargar una nueva rutina? El progreso actual se perderá.')) return;
-  session = null;
-  localStorage.removeItem(STORAGE_KEY);
-  showSetup();
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   RENDER TRACKER
-═══════════════════════════════════════════════════════════════════════════ */
-function renderTracker() {
-  if (!session) return;
-  const done  = session.exercises.filter(e => e.done).length;
-  const total = session.exercises.length;
-  const pct   = total ? (done / total) * 100 : 0;
-
-  document.getElementById('t-day-title').textContent = session.muscle || session.name;
-  document.getElementById('t-done').textContent  = done;
-  document.getElementById('t-total').textContent = `/ ${total}`;
-  document.getElementById('t-progress').style.width = pct + '%';
-
-  let html = '';
-
-  // Session banner
-  html += `<div class="session-banner">
-    <div class="session-name">${session.name}</div>
-    <div class="session-meta">
-      ${session.date     ? `<span>📅 ${session.date}</span>` : ''}
-      ${session.duration ? `<span>⏱ ${session.duration}</span>` : ''}
-      ${session.muscle   ? `<span>💪 ${session.muscle}</span>` : ''}
+  let html='';
+  html+=`<div class="sess-banner">
+    <div class="sess-name">${session.name}</div>
+    <div class="sess-chips">
+      ${session.date?`<span class="sess-chip">📅 ${session.date}</span>`:''}
+      ${session.duration?`<span class="sess-chip">⏱ ${session.duration}</span>`:''}
+      ${session.muscle?`<span class="sess-chip">💪 ${session.muscle}</span>`:''}
     </div>
-    ${session.generalNotes ? `<div class="session-notes" id="sess-notes" onclick="toggleSessNotes()">${session.generalNotes}</div>` : ''}
+    ${session.generalNotes?`<div class="sess-notes" onclick="this.classList.toggle('exp')">${session.generalNotes}</div>`:''}
   </div>`;
 
-  // Warmup
-  if (session.warmup) {
-    html += `<div class="extra-block">
-      <div class="extra-block-title">⏰ Calentamiento</div>
-      <div class="extra-block-text">${session.warmup}</div>
-    </div>`;
-  }
+  if(session.warmup) html+=`<div class="extra-block"><div class="extra-title">⏰ Calentamiento</div><div class="extra-text">${session.warmup}</div></div>`;
 
-  // Exercises
-  html += `<div class="exercises-wrap">
-    <div class="section-label">Ejercicios — ${total} en total</div>`;
+  html+=`<div class="exs-wrap"><div class="sec-label">Ejercicios · ${total} en total</div>`;
 
-  session.exercises.forEach((ex, idx) => {
-    const isOpen = openEx === ex.id;
-    const wDisplay = ex.weight || '—';
-    html += `
-    <div class="ex-card ${ex.done ? 'done' : ''} ${isOpen ? 'open' : ''}" id="card-${ex.id}">
-      <div class="ex-header" onclick="toggleEx(${ex.id})">
-        <div class="ex-num">${idx + 1}</div>
+  session.exercises.forEach((ex,idx)=>{
+    const isOpen=openEx===ex.id;
+    html+=`
+    <div class="ex-card ${ex.done?'done':''} ${isOpen?'open':''}" id="card-${ex.id}">
+      <div class="ex-head" onclick="toggleEx(${ex.id})">
+        <div class="ex-num">${idx+1}</div>
         <button class="check-ring" onclick="toggleDone(event,${ex.id})">✓</button>
         <div class="ex-info">
           <div class="ex-name">${ex.name}</div>
           <div class="ex-tags">
             <span class="tag tag-s">${ex.sets}×</span>
             <span class="tag tag-r">${ex.reps} reps</span>
-            ${ex.weight ? `<span class="tag tag-w">${wDisplay}</span>` : ''}
+            ${ex.weight?`<span class="tag tag-w">${ex.weight}</span>`:''}
           </div>
         </div>
         <div class="ex-chevron">▼</div>
       </div>
-
       <div class="ex-detail">
-        <div class="detail-block">
-          <div class="detail-title">Prescrito</div>
+        <div class="det-block">
+          <div class="det-title">Prescrito</div>
           <div class="chips">
             <div class="chip">Series <strong>${ex.sets}</strong></div>
             <div class="chip">Reps <strong>${ex.reps}</strong></div>
-            ${ex.weight ? `<div class="chip">Peso <strong>${ex.weight}</strong></div>` : ''}
-            ${ex.rest   ? `<div class="chip">Descanso <strong>${ex.rest}s</strong></div>` : ''}
+            ${ex.weight?`<div class="chip">Peso <strong>${ex.weight}</strong></div>`:''}
+            ${ex.rest?`<div class="chip">Descanso <strong>${ex.rest}s</strong></div>`:''}
           </div>
-          ${ex.coachNote ? `<div class="coach-note">${ex.coachNote}</div>` : ''}
+          ${ex.coachNote?`<div class="coach-note">${ex.coachNote}</div>`:''}
         </div>
-
-        <div class="detail-block">
-          <div class="detail-title">Series realizadas</div>
+        <div class="det-block">
+          <div class="det-title">Series realizadas</div>
           <div class="sets-grid">
-            <div class="sg-head">#</div>
-            <div class="sg-head">Reps</div>
-            <div class="sg-head">Peso kg</div>
-            <div class="sg-head">✓</div>
-            ${ex.sets_data.map((s, si) => `
-              <div class="sg-num">${si + 1}</div>
-              <input class="sg-input ${s.confirmed ? 'ok' : ''}" type="text"
-                value="${s.reps}" placeholder="${ex.reps}"
-                oninput="updateSet(${ex.id},${si},'reps',this.value)"
-                onclick="this.select()">
-              <input class="sg-input ${s.confirmed ? 'ok' : ''}" type="number"
-                value="${s.weight}" placeholder="kg"
-                oninput="updateSet(${ex.id},${si},'weight',this.value)"
-                onclick="this.select()">
-              <button class="sg-confirm ${s.confirmed ? 'ok' : ''}"
-                onclick="confirmSet(${ex.id},${si})">✓</button>
+            <div class="sg-h">#</div><div class="sg-h">Reps</div><div class="sg-h">Peso kg</div><div class="sg-h">✓</div>
+            ${ex.sets_data.map((s,si)=>`
+              <div class="sg-n">${si+1}</div>
+              <input class="sg-in ${s.confirmed?'ok':''}" type="text" value="${s.reps}" placeholder="${ex.reps}"
+                oninput="updSet(${ex.id},${si},'reps',this.value)" onclick="this.select()">
+              <input class="sg-in ${s.confirmed?'ok':''}" type="number" value="${s.weight}" placeholder="kg"
+                oninput="updSet(${ex.id},${si},'weight',this.value)" onclick="this.select()">
+              <button class="sg-ok ${s.confirmed?'ok':''}" onclick="confSet(${ex.id},${si})">✓</button>
             `).join('')}
           </div>
         </div>
-
-        <div class="detail-block">
-          <div class="detail-title">Notas personales</div>
+        <div class="det-block">
+          <div class="det-title">Notas personales</div>
           <textarea class="ex-notes" placeholder="Sensaciones, pump, cansancio…"
-            oninput="updateNotes(${ex.id},this.value)">${ex.notes || ''}</textarea>
+            oninput="updNotes(${ex.id},this.value)">${ex.notes||''}</textarea>
         </div>
-
-        ${ex.rest ? `<button class="rest-btn" onclick="startTimer(${ex.rest})">⏱ Iniciar descanso ${ex.rest}s</button>` : ''}
+        ${ex.rest?`<button class="rest-btn" onclick="startTimer(${ex.rest})">⏱ Descanso ${ex.rest}s</button>`:''}
       </div>
     </div>`;
   });
+  html+=`</div>`;
 
-  html += `</div>`; // exercises-wrap
+  if(session.cooldown) html+=`<div class="extra-block"><div class="extra-title">🌬️ Enfriamiento</div><div class="extra-text">${session.cooldown}</div></div>`;
+  if(session.finalNotes) html+=`<div class="extra-block" style="margin:8px 20px 12px"><div class="extra-title">🔥 Notas finales</div><div class="extra-text">${session.finalNotes}</div></div>`;
 
-  // Cooldown
-  if (session.cooldown) {
-    html += `<div class="extra-block" style="margin-bottom:10px;">
-      <div class="extra-block-title">🌬️ Enfriamiento</div>
-      <div class="extra-block-text">${session.cooldown}</div>
-    </div>`;
-  }
-
-  // Final notes
-  if (session.finalNotes) {
-    html += `<div class="extra-block" style="margin:0 20px 10px;">
-      <div class="extra-block-title">🔥 Notas finales</div>
-      <div class="extra-block-text">${session.finalNotes}</div>
-    </div>`;
-  }
-
-  document.getElementById('tracker-body').innerHTML = html;
+  document.getElementById('tracker-body').innerHTML=html;
 }
 
-function toggleSessNotes() {
-  document.getElementById('sess-notes')?.classList.toggle('expanded');
-}
+/* ── ACTIONS ── */
+function toggleEx(id){ openEx=openEx===id?null:id; renderTracker(); if(openEx) setTimeout(()=>document.getElementById('card-'+id)?.scrollIntoView({behavior:'smooth',block:'nearest'}),40); }
+function toggleDone(e,id){ e.stopPropagation(); const ex=session.exercises.find(x=>x.id===id); if(!ex)return; ex.done=!ex.done; save(); renderTracker(); if(ex.done)toast('✓ '+ex.name); }
+function updSet(id,si,f,v){ const ex=session.exercises.find(x=>x.id===id); if(ex){ex.sets_data[si][f]=v;save();} }
+function confSet(id,si){ const ex=session.exercises.find(x=>x.id===id); if(!ex)return; ex.sets_data[si].confirmed=!ex.sets_data[si].confirmed; if(ex.sets_data.every(s=>s.confirmed))ex.done=true; save(); openEx=id; renderTracker(); }
+function updNotes(id,v){ const ex=session.exercises.find(x=>x.id===id); if(ex){ex.notes=v;save();} }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   EXERCISE ACTIONS
-═══════════════════════════════════════════════════════════════════════════ */
-function toggleEx(id) {
-  openEx = openEx === id ? null : id;
-  renderTracker();
-  if (openEx) {
-    setTimeout(() => {
-      document.getElementById('card-' + id)?.scrollIntoView({ behavior:'smooth', block:'nearest' });
-    }, 40);
-  }
-}
+/* ── TIMER ── */
+function startTimer(sec){ stopTimer(); timerSec=sec; timerTotal=sec; document.getElementById('rest-bar').classList.add('show'); updTUI(); timerInt=setInterval(()=>{ timerSec--; updTUI(); if(timerSec<=0){ stopTimer(); if('vibrate' in navigator)navigator.vibrate([200,100,200]); toast('¡Fin del descanso!'); } },1000); }
+function updTUI(){ document.getElementById('rt-count').textContent=timerSec; document.getElementById('rt-fill').style.width=(timerSec/timerTotal*100)+'%'; }
+function stopTimer(){ clearInterval(timerInt); document.getElementById('rest-bar').classList.remove('show'); }
 
-function toggleDone(e, id) {
-  e.stopPropagation();
-  const ex = session.exercises.find(x => x.id === id);
-  if (!ex) return;
-  ex.done = !ex.done;
-  save(); renderTracker();
-  if (ex.done) toast('✓ ' + ex.name);
-}
+/* ── FINISH ── */
+function finishSession(){ const d=session.exercises.filter(e=>e.done).length; const s=session.exercises.reduce((a,e)=>a+e.sets_data.filter(s=>s.confirmed).length,0); document.getElementById('fo-done').textContent=d; document.getElementById('fo-sets').textContent=s; document.getElementById('fo-sub').textContent=`${session.name} · ${session.date||today()}`; document.getElementById('finish-overlay').classList.add('show'); }
+function closeFinish(){ document.getElementById('finish-overlay').classList.remove('show'); }
 
-function updateSet(id, si, field, val) {
-  const ex = session.exercises.find(x => x.id === id);
-  if (ex) { ex.sets_data[si][field] = val; save(); }
-}
+/* ── TOAST ── */
+let tT=null;
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>el.classList.remove('show'),2200); }
 
-function confirmSet(id, si) {
-  const ex = session.exercises.find(x => x.id === id);
-  if (!ex) return;
-  ex.sets_data[si].confirmed = !ex.sets_data[si].confirmed;
-  if (ex.sets_data.every(s => s.confirmed)) ex.done = true;
-  save();
-  openEx = id;
-  renderTracker();
-}
-
-function updateNotes(id, val) {
-  const ex = session.exercises.find(x => x.id === id);
-  if (ex) { ex.notes = val; save(); }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   TIMER
-═══════════════════════════════════════════════════════════════════════════ */
-function startTimer(sec) {
-  stopTimer();
-  timerSec = sec; timerTotal = sec;
-  const bar = document.getElementById('rest-bar');
-  bar.classList.add('show');
-  updateTimerUI();
-  timerInt = setInterval(() => {
-    timerSec--;
-    updateTimerUI();
-    if (timerSec <= 0) {
-      stopTimer();
-      if ('vibrate' in navigator) navigator.vibrate([200,100,200]);
-      toast('¡Descanso terminado!');
-    }
-  }, 1000);
-}
-function updateTimerUI() {
-  document.getElementById('rt-count').textContent = timerSec;
-  document.getElementById('rt-fill').style.width  = (timerSec / timerTotal * 100) + '%';
-}
-function stopTimer() {
-  clearInterval(timerInt);
-  document.getElementById('rest-bar').classList.remove('show');
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   ADD MANUAL
-═══════════════════════════════════════════════════════════════════════════ */
-function openAdd()  { document.getElementById('add-modal').classList.add('show'); }
-function closeAdd() { document.getElementById('add-modal').classList.remove('show'); }
-
-function addManual() {
-  const name = document.getElementById('m-name').value.trim();
-  if (!name) { toast('Escribe el nombre'); return; }
-  const sets   = parseInt(document.getElementById('m-sets').value)   || 3;
-  const reps   = document.getElementById('m-reps').value             || '10-12';
-  const weight = document.getElementById('m-weight').value.trim()    || '';
-  const muscle = document.getElementById('m-muscle').value.trim()    || 'General';
-  const rest   = parseInt(document.getElementById('m-rest').value)   || 90;
-
-  const newEx = {
-    id: Date.now(), name, muscle, sets, reps, weight, rest,
-    coachNote: null, done: false,
-    sets_data: Array.from({length:sets}, () => ({ reps, weight, confirmed:false })),
-    notes: ''
-  };
-  session.exercises.push(newEx);
-  save(); closeAdd(); renderTracker();
-  toast('Ejercicio agregado');
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   FINISH
-═══════════════════════════════════════════════════════════════════════════ */
-function finishSession() {
-  const done  = session.exercises.filter(e => e.done).length;
-  const total = session.exercises.length;
-  const sets  = session.exercises.reduce((a,e) => a + e.sets_data.filter(s=>s.confirmed).length, 0);
-  document.getElementById('fo-done').textContent = done;
-  document.getElementById('fo-sets').textContent = sets;
-  document.getElementById('fo-sub').textContent  =
-    `${session.name} · ${new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'})}`;
-  document.getElementById('finish-overlay').classList.add('show');
-}
-function closeFinish() {
-  document.getElementById('finish-overlay').classList.remove('show');
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   UI HELPERS
-═══════════════════════════════════════════════════════════════════════════ */
-function setStatus(msg, type='') {
-  const el = document.getElementById('parse-status');
-  el.textContent = msg;
-  el.className = 'parse-status' + (type ? ' ' + type : '');
-}
-function setBtnLoading(on) {
-  const btn  = document.getElementById('parse-btn');
-  const txt  = document.getElementById('parse-btn-text');
-  btn.disabled = on;
-  txt.innerHTML = on
-    ? '<div class="spinner"></div> Procesando…'
-    : '⚡ Cargar rutina';
-}
-
-let toastTimer = null;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════════════════════════════════ */
-(function init() {
-  const k = loadApiKey();
-  if (k) document.getElementById('api-key-input').value = k;
-
-  if (loadSaved() && session) {
-    showTracker();
-  } else {
-    showSetup();
-  }
-})();
+/* ── INIT ── */
+(function(){ if(loadSaved()&&session){ showSetup(); } })();
 </script>
 </body>
 </html>
