@@ -307,6 +307,24 @@ body{max-width:480px;margin:0 auto;position:relative}
 .chart-title{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:12px}
 canvas.rpt-canvas{width:100%;display:block;border-radius:4px}
 
+/* ── PHONE LINK PANEL ── */
+.phone-link-wrap{margin-top:14px;background:var(--surface);border:1px solid var(--accent-dim);border-radius:var(--r);overflow:hidden;display:none}
+.phone-link-head{padding:11px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.phone-link-icon{font-size:20px;flex-shrink:0}
+.phone-link-title{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent-dim);flex:1}
+.phone-link-body{padding:14px}
+.phone-link-url{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--rs);padding:10px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-mid);word-break:break-all;line-height:1.5;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.phone-link-url:active{border-color:var(--accent)}
+.phone-link-btns{display:flex;gap:8px}
+.plb{flex:1;padding:10px 8px;border-radius:var(--rs);font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;transition:opacity .15s}
+.plb:active{opacity:.8}
+.plb-copy{background:var(--surface3);color:var(--text-mid);border:1px solid var(--border2)}
+.plb-copy.copied{background:var(--done-bg);color:var(--done-text);border-color:var(--done-border)}
+.plb-start{background:var(--accent);color:#000}
+.phone-link-qr{margin-top:12px;text-align:center;display:none}
+.phone-link-qr canvas{border-radius:6px;background:#fff;padding:8px}
+.phone-link-qr-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:6px;text-transform:uppercase;letter-spacing:1px}
+
 /* toast */
 #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:9px 18px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text-mid);z-index:900;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1}
@@ -354,7 +372,27 @@ textarea{-webkit-appearance:none}
           <button class="preview-edit-btn" onclick="goEditParsed()">✏️ Editar</button>
         </div>
         <div class="preview-list" id="preview-list"></div>
-        <button class="preview-start" onclick="startFromParsed()">Empezar entrenamiento →</button>
+        <!-- shown on mobile OR desktop when user wants to start here -->
+        <button class="preview-start" id="btn-start-here" onclick="startFromParsed()">▶ Empezar aquí →</button>
+      </div>
+
+      <!-- phone link panel — shown on desktop after parse -->
+      <div class="phone-link-wrap" id="phone-link-wrap">
+        <div class="phone-link-head">
+          <div class="phone-link-icon">📱</div>
+          <div class="phone-link-title">Abrir en tu celular</div>
+        </div>
+        <div class="phone-link-body">
+          <div class="phone-link-url" id="phone-link-url" onclick="copyLink()">—</div>
+          <div class="phone-link-btns">
+            <button class="plb plb-copy" id="btn-copy" onclick="copyLink()">Copiar link</button>
+            <button class="plb plb-start" onclick="startFromParsed()">Empezar en PC →</button>
+          </div>
+          <div class="phone-link-qr" id="qr-wrap">
+            <canvas id="qr-canvas"></canvas>
+            <div class="phone-link-qr-label">Escanea con tu celular</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -632,6 +670,7 @@ function parseAndPreview(){
   if(!exs.length){
     setRes('No encontré ejercicios numerados (formato: "1. Nombre | X series × Y reps"). Usa la pestaña Manual.','warn');
     document.getElementById('preview-wrap').style.display='none';
+    document.getElementById('phone-link-wrap').style.display='none';
     return;
   }
   setRes(`✓ ${exs.length} ejercicio${exs.length>1?'s':''} detectado${exs.length>1?'s':''}`, 'ok');
@@ -643,6 +682,11 @@ function parseAndPreview(){
       <div class="prev-ex-meta">${ex.sets}×${ex.reps}${ex.weight?' · '+ex.weight:''}</div>
     </div>`).join('');
   document.getElementById('preview-wrap').style.display='block';
+
+  // Desktop → show phone link panel
+  if(isDesktop()){
+    showPhonePanel(parsedBuf);
+  }
 }
 
 function setRes(msg,type=''){
@@ -1267,8 +1311,152 @@ function loadScript(src){
 let tT=null;
 function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>el.classList.remove('show'),2200); }
 
+/* ── DEVICE DETECTION ── */
+function isDesktop(){
+  return window.matchMedia('(pointer:fine)').matches && window.innerWidth >= 768;
+}
+
+/* ── URL ENCODE/DECODE SESSION ── */
+function sessionToUrl(parsed){
+  // strip sets_data tracking (fresh start on phone), keep only definition
+  const payload={
+    n: parsed.name,
+    d: parsed.date,
+    m: parsed.muscle,
+    du: parsed.duration,
+    w: parsed.warmup,
+    c: parsed.cooldown,
+    gn: parsed.generalNotes,
+    fn: parsed.finalNotes,
+    e: parsed.exercises.map(ex=>({
+      i: ex.id,
+      n: ex.name,
+      mu: ex.muscle,
+      s: ex.sets,
+      r: ex.reps,
+      w: ex.weight,
+      re: ex.rest,
+      cn: ex.coachNote
+    }))
+  };
+  try{
+    const json=JSON.stringify(payload);
+    const b64=btoa(unescape(encodeURIComponent(json)));
+    const base=window.location.href.split('?')[0].split('#')[0];
+    return `${base}?r=${encodeURIComponent(b64)}`;
+  } catch(e){ return null; }
+}
+
+function urlToSession(b64){
+  try{
+    const json=decodeURIComponent(escape(atob(b64)));
+    const p=JSON.parse(json);
+    return {
+      name: p.n||'Rutina',
+      date: p.d||today(),
+      muscle: p.m||'',
+      duration: p.du||'',
+      warmup: p.w||null,
+      cooldown: p.c||null,
+      generalNotes: p.gn||null,
+      finalNotes: p.fn||null,
+      exercises: (p.e||[]).map(ex=>({
+        id: ex.i,
+        name: ex.n,
+        muscle: ex.mu,
+        sets: ex.s,
+        reps: ex.r,
+        weight: ex.w,
+        rest: ex.re,
+        coachNote: ex.cn,
+        done: false,
+        notes: '',
+        sets_data: Array.from({length:ex.s||3},()=>({reps:ex.r||'',weight:ex.w||'',confirmed:false}))
+      }))
+    };
+  } catch(e){ return null; }
+}
+
+/* ── SHOW PHONE PANEL ── */
+function showPhonePanel(parsed){
+  const url=sessionToUrl(parsed);
+  if(!url) return;
+  document.getElementById('phone-link-url').textContent=url;
+  document.getElementById('phone-link-wrap').style.display='block';
+  // generate QR
+  generateQR(url);
+}
+
+async function generateQR(url){
+  if(!window.QRCode){
+    try{
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js');
+    }catch(e){ return; }
+  }
+  const wrap=document.getElementById('qr-wrap');
+  const canvas=document.getElementById('qr-canvas');
+  try{
+    // QRCode lib uses a div target
+    const tmp=document.createElement('div');
+    new QRCode(tmp,{text:url,width:160,height:160,colorDark:'#000',colorLight:'#fff'});
+    // it creates an img or canvas inside tmp
+    setTimeout(()=>{
+      const img=tmp.querySelector('img');
+      const qc=tmp.querySelector('canvas');
+      if(qc){
+        const ctx=canvas.getContext('2d');
+        canvas.width=160; canvas.height=160;
+        ctx.drawImage(qc,0,0);
+        wrap.style.display='block';
+      } else if(img){
+        canvas.width=160; canvas.height=160;
+        const i=new Image();
+        i.onload=()=>{ canvas.getContext('2d').drawImage(i,0,0,160,160); };
+        i.src=img.src;
+        wrap.style.display='block';
+      }
+    },200);
+  } catch(e){}
+}
+
+function copyLink(){
+  const url=document.getElementById('phone-link-url').textContent;
+  const btn=document.getElementById('btn-copy');
+  navigator.clipboard.writeText(url).then(()=>{
+    btn.textContent='✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='Copiar link'; btn.classList.remove('copied'); },2000);
+    toast('✓ Link copiado');
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('✓ Link copiado');
+  });
+}
+
 /* ── INIT ── */
-(function(){ if(loadSaved()&&session){ showSetup(); } })();
+(function(){
+  // Check if opened via shared URL (?r=...)
+  const params=new URLSearchParams(window.location.search);
+  const r=params.get('r');
+  if(r){
+    const s=urlToSession(r);
+    if(s){
+      session=s;
+      save();
+      // clean URL without reloading
+      history.replaceState(null,'',window.location.pathname);
+      // go straight to tracker slide 1 (skip overview)
+      curSlide=1;
+      showTracker(false);
+      return;
+    }
+  }
+  // Normal init
+  if(loadSaved()&&session){ showSetup(); }
+})();
 </script>
 </body>
 </html>
