@@ -307,23 +307,34 @@ body{max-width:480px;margin:0 auto;position:relative}
 .chart-title{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:12px}
 canvas.rpt-canvas{width:100%;display:block;border-radius:4px}
 
-/* ── PHONE LINK PANEL ── */
-.phone-link-wrap{margin-top:14px;background:var(--surface);border:1px solid var(--accent-dim);border-radius:var(--r);overflow:hidden;display:none}
-.phone-link-head{padding:11px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-.phone-link-icon{font-size:20px;flex-shrink:0}
-.phone-link-title{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent-dim);flex:1}
-.phone-link-body{padding:14px}
-.phone-link-url{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--rs);padding:10px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-mid);word-break:break-all;line-height:1.5;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
-.phone-link-url:active{border-color:var(--accent)}
-.phone-link-btns{display:flex;gap:8px}
-.plb{flex:1;padding:10px 8px;border-radius:var(--rs);font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;transition:opacity .15s}
-.plb:active{opacity:.8}
-.plb-copy{background:var(--surface3);color:var(--text-mid);border:1px solid var(--border2)}
-.plb-copy.copied{background:var(--done-bg);color:var(--done-text);border-color:var(--done-border)}
-.plb-start{background:var(--accent);color:#000}
-.phone-link-qr{margin-top:12px;text-align:center;display:none}
-.phone-link-qr canvas{border-radius:6px;background:#fff;padding:8px}
-.phone-link-qr-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:6px;text-transform:uppercase;letter-spacing:1px}
+/* ── CODE TRANSFER PANEL ── */
+.code-panel{margin-top:12px;background:var(--surface);border:1px solid var(--accent-dim);border-radius:var(--r);overflow:hidden;display:none}
+.code-panel-head{padding:11px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.code-panel-icon{font-size:18px;flex-shrink:0}
+.code-panel-title{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent-dim);flex:1}
+.code-panel-body{padding:14px}
+.code-box{background:#000;border:1px solid var(--border2);border-radius:var(--rs);padding:10px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);word-break:break-all;line-height:1.6;max-height:80px;overflow:hidden;cursor:pointer;position:relative;margin-bottom:10px;transition:max-height .2s}
+.code-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(transparent,#000)}
+.code-box.expanded{max-height:240px}
+.code-box.expanded::after{display:none}
+.code-panel-btns{display:flex;gap:8px;margin-bottom:12px}
+.cpb{flex:1;padding:10px 8px;border-radius:var(--rs);font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s}
+.cpb:active{opacity:.8}
+.cpb-copy{background:var(--surface3);color:var(--text-mid);border:1px solid var(--border2) !important;border:none}
+.cpb-copy.copied{background:var(--done-bg);color:var(--done-text)}
+.cpb-start{background:var(--accent);color:#000}
+.code-steps{font-size:12px;color:var(--text-dim);line-height:1.7}
+.code-steps b{color:var(--text-mid)}
+
+/* code input tab */
+.code-input-wrap{display:flex;flex-direction:column;gap:10px}
+.code-input-area{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rs);color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;padding:12px 13px;resize:none;outline:none;min-height:90px;line-height:1.6;transition:border-color .15s;word-break:break-all}
+.code-input-area:focus{border-color:var(--accent)}
+.code-input-area::placeholder{color:var(--text-dim);font-size:12px;font-family:'DM Sans',sans-serif}
+.code-load-btn{width:100%;padding:13px;background:var(--accent);border:none;border-radius:var(--rs);color:#000;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer}
+.code-load-result{font-family:'DM Mono',monospace;font-size:11px;text-align:center;min-height:16px}
+.code-load-result.ok{color:var(--accent)}
+.code-load-result.error{color:var(--danger)}
 
 /* toast */
 #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:9px 18px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text-mid);z-index:900;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
@@ -353,14 +364,15 @@ textarea{-webkit-appearance:none}
     </div>
 
     <div class="tab-row">
-      <button class="tab-btn active" onclick="switchTab('paste')">📋 Pegar mensaje</button>
+      <button class="tab-btn active" onclick="switchTab('paste')">📋 WhatsApp</button>
+      <button class="tab-btn"        onclick="switchTab('code')">📲 Código</button>
       <button class="tab-btn"        onclick="switchTab('manual')">✏️ Manual</button>
     </div>
 
     <!-- PASTE TAB -->
     <div id="tab-paste" class="tab-panel active">
       <div class="paste-label">Pega el mensaje de WhatsApp</div>
-      <div class="paste-sub">El parser detecta ejercicios, series, reps, pesos y notas técnicas automáticamente sin ninguna API.</div>
+      <div class="paste-sub">El parser detecta ejercicios, series, reps, pesos y notas técnicas automáticamente.</div>
       <textarea class="msg-textarea" id="msg-input"
         placeholder="🍽️ Rutina HOY LUNES 23 – Día 1: Pecho + Tríceps&#10;⏰ ~45-55 min&#10;Notas: Técnica primero. Descansos 90-120 s compuestos.&#10;&#10;1. Press banca (máquina o barra) | 4 series × 8-12 reps&#10;   💪 Recomendado: 35-40 kg&#10;   📝 Baja controlado hasta pecho, codos ~45°...&#10;&#10;2. Press inclinado | 3 series × 10-12 reps&#10;   💪 Recomendado: 12.5-15 kg por mancuerna&#10;..."></textarea>
       <button class="parse-btn" onclick="parseAndPreview()">⚡ Parsear rutina</button>
@@ -372,27 +384,37 @@ textarea{-webkit-appearance:none}
           <button class="preview-edit-btn" onclick="goEditParsed()">✏️ Editar</button>
         </div>
         <div class="preview-list" id="preview-list"></div>
-        <!-- shown on mobile OR desktop when user wants to start here -->
         <button class="preview-start" id="btn-start-here" onclick="startFromParsed()">▶ Empezar aquí →</button>
       </div>
 
-      <!-- phone link panel — shown on desktop after parse -->
-      <div class="phone-link-wrap" id="phone-link-wrap">
-        <div class="phone-link-head">
-          <div class="phone-link-icon">📱</div>
-          <div class="phone-link-title">Abrir en tu celular</div>
+      <!-- code export panel — visible on desktop after parse -->
+      <div class="code-panel" id="code-panel">
+        <div class="code-panel-head">
+          <div class="code-panel-icon">📲</div>
+          <div class="code-panel-title">Enviar al celular</div>
         </div>
-        <div class="phone-link-body">
-          <div class="phone-link-url" id="phone-link-url" onclick="copyLink()">—</div>
-          <div class="phone-link-btns">
-            <button class="plb plb-copy" id="btn-copy" onclick="copyLink()">Copiar link</button>
-            <button class="plb plb-start" onclick="startFromParsed()">Empezar en PC →</button>
+        <div class="code-panel-body">
+          <div class="code-box" id="code-box" onclick="this.classList.toggle('expanded')">—</div>
+          <div class="code-panel-btns">
+            <button class="cpb cpb-copy" id="btn-copy-code" onclick="copyCode()">Copiar código</button>
+            <button class="cpb cpb-start" onclick="startFromParsed()">Empezar en PC →</button>
           </div>
-          <div class="phone-link-qr" id="qr-wrap">
-            <canvas id="qr-canvas"></canvas>
-            <div class="phone-link-qr-label">Escanea con tu celular</div>
+          <div class="code-steps">
+            <b>En tu celular:</b> abre la app → pestaña <b>📲 Código</b> → pega el código → ¡listo!
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- CODE TAB — for mobile, paste the code generated on PC -->
+    <div id="tab-code" class="tab-panel">
+      <div class="paste-label">Pega el código de tu PC</div>
+      <div class="paste-sub">Copia el código que generó la app en tu computadora y pégalo aquí para cargar la rutina directo.</div>
+      <div class="code-input-wrap">
+        <textarea class="code-input-area" id="code-input"
+          placeholder="Pega aquí el código de tu rutina...&#10;&#10;eyJuIjoiRMOtYSAxOiBQZWN..."></textarea>
+        <div class="code-load-result" id="code-load-result"></div>
+        <button class="code-load-btn" onclick="loadFromCode()">▶ Cargar rutina</button>
       </div>
     </div>
 
@@ -656,9 +678,12 @@ function today(){ return new Date().toLocaleDateString('es-MX',{weekday:'long',d
 
 /* ── TABS ── */
 function switchTab(t){
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='paste')||(i===1&&t==='manual')));
-  document.getElementById('tab-paste').classList.toggle('active',t==='paste');
-  document.getElementById('tab-manual').classList.toggle('active',t==='manual');
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', (i===0&&t==='paste')||(i===1&&t==='code')||(i===2&&t==='manual'));
+  });
+  document.getElementById('tab-paste').classList.toggle('active', t==='paste');
+  document.getElementById('tab-code').classList.toggle('active',  t==='code');
+  document.getElementById('tab-manual').classList.toggle('active', t==='manual');
 }
 
 /* ── PARSE & PREVIEW ── */
@@ -683,9 +708,9 @@ function parseAndPreview(){
     </div>`).join('');
   document.getElementById('preview-wrap').style.display='block';
 
-  // Desktop → show phone link panel
+  // Desktop → show code export panel
   if(isDesktop()){
-    showPhonePanel(parsedBuf);
+    showCodePanel(parsedBuf);
   }
 }
 
@@ -1316,145 +1341,80 @@ function isDesktop(){
   return window.matchMedia('(pointer:fine)').matches && window.innerWidth >= 768;
 }
 
-/* ── URL ENCODE/DECODE SESSION ── */
-function sessionToUrl(parsed){
-  // strip sets_data tracking (fresh start on phone), keep only definition
+/* ── CODE ENCODE/DECODE ── */
+function parsedToCode(parsed){
   const payload={
-    n: parsed.name,
-    d: parsed.date,
-    m: parsed.muscle,
-    du: parsed.duration,
-    w: parsed.warmup,
-    c: parsed.cooldown,
-    gn: parsed.generalNotes,
-    fn: parsed.finalNotes,
+    n: parsed.name,       d: parsed.date,
+    m: parsed.muscle,     du: parsed.duration,
+    w: parsed.warmup,     c: parsed.cooldown,
+    gn: parsed.generalNotes, fn: parsed.finalNotes,
     e: parsed.exercises.map(ex=>({
-      i: ex.id,
-      n: ex.name,
-      mu: ex.muscle,
-      s: ex.sets,
-      r: ex.reps,
-      w: ex.weight,
-      re: ex.rest,
-      cn: ex.coachNote
+      i:ex.id, n:ex.name, mu:ex.muscle,
+      s:ex.sets, r:ex.reps, w:ex.weight,
+      re:ex.rest, cn:ex.coachNote
     }))
   };
-  try{
-    const json=JSON.stringify(payload);
-    const b64=btoa(unescape(encodeURIComponent(json)));
-    const base=window.location.href.split('?')[0].split('#')[0];
-    return `${base}?r=${encodeURIComponent(b64)}`;
-  } catch(e){ return null; }
+  return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 }
 
-function urlToSession(b64){
+function codeToSession(b64){
   try{
-    const json=decodeURIComponent(escape(atob(b64)));
-    const p=JSON.parse(json);
+    const p=JSON.parse(decodeURIComponent(escape(atob(b64.trim()))));
     return {
-      name: p.n||'Rutina',
-      date: p.d||today(),
-      muscle: p.m||'',
-      duration: p.du||'',
-      warmup: p.w||null,
-      cooldown: p.c||null,
-      generalNotes: p.gn||null,
-      finalNotes: p.fn||null,
-      exercises: (p.e||[]).map(ex=>({
-        id: ex.i,
-        name: ex.n,
-        muscle: ex.mu,
-        sets: ex.s,
-        reps: ex.r,
-        weight: ex.w,
-        rest: ex.re,
-        coachNote: ex.cn,
-        done: false,
-        notes: '',
-        sets_data: Array.from({length:ex.s||3},()=>({reps:ex.r||'',weight:ex.w||'',confirmed:false}))
+      name:p.n||'Rutina', date:p.d||today(), muscle:p.m||'',
+      duration:p.du||'', warmup:p.w||null, cooldown:p.c||null,
+      generalNotes:p.gn||null, finalNotes:p.fn||null,
+      exercises:(p.e||[]).map(ex=>({
+        id:ex.i, name:ex.n, muscle:ex.mu,
+        sets:ex.s, reps:ex.r, weight:ex.w,
+        rest:ex.re, coachNote:ex.cn,
+        done:false, notes:'',
+        sets_data:Array.from({length:ex.s||3},()=>({reps:ex.r||'',weight:ex.w||'',confirmed:false}))
       }))
     };
   } catch(e){ return null; }
 }
 
-/* ── SHOW PHONE PANEL ── */
-function showPhonePanel(parsed){
-  const url=sessionToUrl(parsed);
-  if(!url) return;
-  document.getElementById('phone-link-url').textContent=url;
-  document.getElementById('phone-link-wrap').style.display='block';
-  // generate QR
-  generateQR(url);
+/* ── SHOW CODE PANEL (desktop) ── */
+function showCodePanel(parsed){
+  const code=parsedToCode(parsed);
+  document.getElementById('code-box').textContent=code;
+  document.getElementById('code-panel').style.display='block';
 }
 
-async function generateQR(url){
-  if(!window.QRCode){
-    try{
-      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js');
-    }catch(e){ return; }
-  }
-  const wrap=document.getElementById('qr-wrap');
-  const canvas=document.getElementById('qr-canvas');
-  try{
-    // QRCode lib uses a div target
-    const tmp=document.createElement('div');
-    new QRCode(tmp,{text:url,width:160,height:160,colorDark:'#000',colorLight:'#fff'});
-    // it creates an img or canvas inside tmp
-    setTimeout(()=>{
-      const img=tmp.querySelector('img');
-      const qc=tmp.querySelector('canvas');
-      if(qc){
-        const ctx=canvas.getContext('2d');
-        canvas.width=160; canvas.height=160;
-        ctx.drawImage(qc,0,0);
-        wrap.style.display='block';
-      } else if(img){
-        canvas.width=160; canvas.height=160;
-        const i=new Image();
-        i.onload=()=>{ canvas.getContext('2d').drawImage(i,0,0,160,160); };
-        i.src=img.src;
-        wrap.style.display='block';
-      }
-    },200);
-  } catch(e){}
-}
-
-function copyLink(){
-  const url=document.getElementById('phone-link-url').textContent;
-  const btn=document.getElementById('btn-copy');
-  navigator.clipboard.writeText(url).then(()=>{
-    btn.textContent='✓ Copiado';
-    btn.classList.add('copied');
-    setTimeout(()=>{ btn.textContent='Copiar link'; btn.classList.remove('copied'); },2000);
-    toast('✓ Link copiado');
-  }).catch(()=>{
-    // fallback
+function copyCode(){
+  const code=document.getElementById('code-box').textContent;
+  const btn=document.getElementById('btn-copy-code');
+  const write=()=>{
+    btn.textContent='✓ Copiado'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='Copiar código'; btn.classList.remove('copied'); },2200);
+    toast('✓ Código copiado — pégalo en la pestaña 📲 de tu celular');
+  };
+  navigator.clipboard.writeText(code).then(write).catch(()=>{
     const ta=document.createElement('textarea');
-    ta.value=url; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    toast('✓ Link copiado');
+    ta.value=code; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); write();
   });
+}
+
+/* ── LOAD FROM CODE (mobile) ── */
+function loadFromCode(){
+  const raw=document.getElementById('code-input').value.trim();
+  const resEl=document.getElementById('code-load-result');
+  if(!raw){ resEl.textContent='Pega el código primero'; resEl.className='code-load-result error'; return; }
+  const s=codeToSession(raw);
+  if(!s||!s.exercises.length){
+    resEl.textContent='Código inválido — cópialo completo desde la PC';
+    resEl.className='code-load-result error'; return;
+  }
+  resEl.textContent=`✓ ${s.exercises.length} ejercicios cargados`;
+  resEl.className='code-load-result ok';
+  session=s; save();
+  setTimeout(()=>{ curSlide=1; showTracker(false); },500);
 }
 
 /* ── INIT ── */
 (function(){
-  // Check if opened via shared URL (?r=...)
-  const params=new URLSearchParams(window.location.search);
-  const r=params.get('r');
-  if(r){
-    const s=urlToSession(r);
-    if(s){
-      session=s;
-      save();
-      // clean URL without reloading
-      history.replaceState(null,'',window.location.pathname);
-      // go straight to tracker slide 1 (skip overview)
-      curSlide=1;
-      showTracker(false);
-      return;
-    }
-  }
-  // Normal init
   if(loadSaved()&&session){ showSetup(); }
 })();
 </script>
