@@ -336,6 +336,51 @@ canvas.rpt-canvas{width:100%;display:block;border-radius:4px}
 .code-load-result.ok{color:var(--accent)}
 .code-load-result.error{color:var(--danger)}
 
+/* ── GROK TAB ── */
+.grok-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.grok-logo{width:32px;height:32px;background:#000;border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.grok-header-text{}
+.grok-header-title{font-weight:600;font-size:15px;line-height:1.2}
+.grok-header-sub{font-size:12px;color:var(--text-mid)}
+
+.grok-key-wrap{margin-bottom:14px}
+.grok-key-row{display:flex;gap:6px;align-items:center}
+.grok-key-input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:9px 11px;outline:none;transition:border-color .15s;letter-spacing:.3px}
+.grok-key-input:focus{border-color:var(--accent)}
+.grok-key-input::placeholder{color:var(--text-dim)}
+.grok-key-save{padding:9px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text-mid);font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.grok-key-save.saved{border-color:var(--done-border);color:var(--done-text)}
+.grok-key-note{font-size:11px;color:var(--text-dim);margin-top:5px;font-style:italic}
+
+.grok-params{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.grok-param-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.grok-select{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 11px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+.grok-select:focus{border-color:var(--accent)}
+.grok-row{display:flex;gap:8px}
+.grok-group{flex:1}
+.grok-extra{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 11px;resize:none;outline:none;min-height:52px;line-height:1.5}
+.grok-extra:focus{border-color:var(--accent)}
+.grok-extra::placeholder{color:var(--text-dim)}
+
+.grok-gen-btn{width:100%;padding:14px;background:#000;border:1px solid var(--border2);border-radius:var(--rs);color:var(--accent);font-family:'DM Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
+.grok-gen-btn:active{opacity:.8}
+.grok-gen-btn:disabled{opacity:.4;cursor:not-allowed}
+.grok-gen-btn.loading{border-color:var(--accent)}
+
+.grok-status{font-family:'DM Mono',monospace;font-size:11px;text-align:center;min-height:16px;margin-bottom:8px}
+.grok-status.ok{color:var(--accent)}
+.grok-status.error{color:var(--danger)}
+.grok-status.loading{color:var(--text-dim)}
+
+.grok-raw-wrap{margin-top:10px;display:none}
+.grok-raw-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.grok-raw-toggle{cursor:pointer;color:var(--text-dim);font-size:10px;text-decoration:underline}
+.grok-raw-text{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--text-mid);line-height:1.6;max-height:160px;overflow-y:auto;white-space:pre-wrap;display:none}
+.grok-raw-text.show{display:block}
+
+/* spinner reuse */
+.grok-spin{width:14px;height:14px;border:2px solid rgba(200,241,53,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+
 /* toast */
 #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:9px 18px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text-mid);z-index:900;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1}
@@ -365,6 +410,7 @@ textarea{-webkit-appearance:none}
 
     <div class="tab-row">
       <button class="tab-btn active" onclick="switchTab('paste')">📋 WhatsApp</button>
+      <button class="tab-btn"        onclick="switchTab('grok')">🤖 Grok</button>
       <button class="tab-btn"        onclick="switchTab('code')">📲 Código</button>
       <button class="tab-btn"        onclick="switchTab('manual')">✏️ Manual</button>
     </div>
@@ -406,7 +452,104 @@ textarea{-webkit-appearance:none}
       </div>
     </div>
 
-    <!-- CODE TAB — for mobile, paste the code generated on PC -->
+    <!-- GROK TAB -->
+    <div id="tab-grok" class="tab-panel">
+
+      <div class="grok-header">
+        <div class="grok-logo">𝕏</div>
+        <div class="grok-header-text">
+          <div class="grok-header-title">Generar rutina con Grok</div>
+          <div class="grok-header-sub">Grok diseña tu sesión → se carga directo</div>
+        </div>
+      </div>
+
+      <!-- API Key -->
+      <div class="grok-key-wrap">
+        <div class="grok-param-label">API Key de xAI</div>
+        <div class="grok-key-row">
+          <input class="grok-key-input" id="grok-key" type="password"
+            placeholder="xai-..." autocomplete="off" spellcheck="false">
+          <button class="grok-key-save" id="grok-key-save-btn" onclick="saveGrokKey()">Guardar</button>
+        </div>
+        <div class="grok-key-note">Se guarda solo en este dispositivo. <a href="https://console.x.ai" target="_blank" style="color:var(--accent-dim)">console.x.ai</a></div>
+      </div>
+
+      <!-- Parámetros -->
+      <div class="grok-params">
+        <div>
+          <div class="grok-param-label">Grupos musculares</div>
+          <select class="grok-select" id="gk-muscle">
+            <option value="Pecho + Tríceps">Pecho + Tríceps</option>
+            <option value="Espalda + Bíceps">Espalda + Bíceps</option>
+            <option value="Piernas + Core">Piernas + Core</option>
+            <option value="Hombros + Core">Hombros + Core</option>
+            <option value="Full Body">Full Body</option>
+            <option value="Upper Body">Upper Body</option>
+            <option value="Lower Body">Lower Body</option>
+            <option value="Core + Cardio">Core + Cardio</option>
+          </select>
+        </div>
+        <div class="grok-row">
+          <div class="grok-group">
+            <div class="grok-param-label">Duración</div>
+            <select class="grok-select" id="gk-duration">
+              <option value="30-40 min">30-40 min</option>
+              <option value="45-55 min" selected>45-55 min</option>
+              <option value="60-70 min">60-70 min</option>
+              <option value="75-90 min">75-90 min</option>
+            </select>
+          </div>
+          <div class="grok-group">
+            <div class="grok-param-label">Nivel</div>
+            <select class="grok-select" id="gk-level">
+              <option value="principiante">Principiante</option>
+              <option value="intermedio" selected>Intermedio</option>
+              <option value="avanzado">Avanzado</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <div class="grok-param-label">Equipo disponible</div>
+          <select class="grok-select" id="gk-equip">
+            <option value="gimnasio completo" selected>Gimnasio completo</option>
+            <option value="mancuernas y barra">Mancuernas + Barra</option>
+            <option value="solo mancuernas">Solo mancuernas</option>
+            <option value="máquinas de gimnasio">Solo máquinas</option>
+            <option value="peso corporal">Peso corporal</option>
+          </select>
+        </div>
+        <div>
+          <div class="grok-param-label">Notas extra (opcional)</div>
+          <textarea class="grok-extra" id="gk-notes"
+            placeholder="Ej: tengo molestia en rodilla derecha, sube el peso respecto la semana pasada, incluye superseries..."></textarea>
+        </div>
+      </div>
+
+      <button class="grok-gen-btn" id="grok-gen-btn" onclick="generateWithGrok()">
+        <span id="grok-gen-label">⚡ Generar rutina con Grok</span>
+      </button>
+      <div class="grok-status" id="grok-status"></div>
+
+      <!-- preview reutilizado -->
+      <div class="preview-wrap" id="grok-preview-wrap" style="display:none">
+        <div class="preview-head">
+          <div class="preview-title" id="grok-preview-title">Rutina generada</div>
+          <button class="preview-edit-btn" onclick="goEditGrok()">✏️ Editar</button>
+        </div>
+        <div class="preview-list" id="grok-preview-list"></div>
+        <button class="preview-start" onclick="startFromGrok()">▶ Empezar entrenamiento →</button>
+      </div>
+
+      <!-- raw response toggle -->
+      <div class="grok-raw-wrap" id="grok-raw-wrap">
+        <div class="grok-raw-label">
+          <span>Respuesta de Grok</span>
+          <span class="grok-raw-toggle" onclick="document.getElementById('grok-raw-text').classList.toggle('show')">ver / ocultar</span>
+        </div>
+        <div class="grok-raw-text" id="grok-raw-text"></div>
+      </div>
+
+    </div>
     <div id="tab-code" class="tab-panel">
       <div class="paste-label">Pega el código de tu PC</div>
       <div class="paste-sub">Copia el código que generó la app en tu computadora y pégalo aquí para cargar la rutina directo.</div>
@@ -678,12 +821,12 @@ function today(){ return new Date().toLocaleDateString('es-MX',{weekday:'long',d
 
 /* ── TABS ── */
 function switchTab(t){
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    b.classList.toggle('active', (i===0&&t==='paste')||(i===1&&t==='code')||(i===2&&t==='manual'));
+  const tabs=['paste','grok','code','manual'];
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active', tabs[i]===t));
+  tabs.forEach(id=>{
+    const el=document.getElementById('tab-'+id);
+    if(el) el.classList.toggle('active', id===t);
   });
-  document.getElementById('tab-paste').classList.toggle('active', t==='paste');
-  document.getElementById('tab-code').classList.toggle('active',  t==='code');
-  document.getElementById('tab-manual').classList.toggle('active', t==='manual');
 }
 
 /* ── PARSE & PREVIEW ── */
@@ -695,7 +838,7 @@ function parseAndPreview(){
   if(!exs.length){
     setRes('No encontré ejercicios numerados (formato: "1. Nombre | X series × Y reps"). Usa la pestaña Manual.','warn');
     document.getElementById('preview-wrap').style.display='none';
-    document.getElementById('phone-link-wrap').style.display='none';
+    document.getElementById('code-panel').style.display='none';
     return;
   }
   setRes(`✓ ${exs.length} ejercicio${exs.length>1?'s':''} detectado${exs.length>1?'s':''}`, 'ok');
@@ -1336,6 +1479,177 @@ function loadScript(src){
 let tT=null;
 function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>el.classList.remove('show'),2200); }
 
+/* ════════════════════════════════════════
+   GROK INTEGRATION
+════════════════════════════════════════ */
+const GROK_KEY_SK = 'gymtrack_grok_key';
+
+function saveGrokKey(){
+  const key = document.getElementById('grok-key').value.trim();
+  if(!key){ toast('Ingresa tu API key'); return; }
+  localStorage.setItem(GROK_KEY_SK, key);
+  const btn = document.getElementById('grok-key-save-btn');
+  btn.textContent = '✓ Guardada'; btn.classList.add('saved');
+  setTimeout(()=>{ btn.textContent='Guardar'; btn.classList.remove('saved'); }, 2000);
+  toast('✓ API key guardada');
+}
+
+function loadGrokKey(){
+  const k = localStorage.getItem(GROK_KEY_SK);
+  if(k) document.getElementById('grok-key').value = k;
+  return k || '';
+}
+
+// System prompt that forces the exact format the regex parser understands
+const GROK_SYSTEM = `Eres un entrenador personal experto. Diseña rutinas de gimnasio profesionales.
+IMPORTANTE: Responde ÚNICAMENTE con el texto de la rutina en el formato exacto que se indica abajo. Sin saludos, sin explicaciones, sin markdown adicional.
+
+FORMATO OBLIGATORIO:
+🍽️ Rutina HOY [DÍA] – Día N: [MÚSCULO PRINCIPAL]
+⏰ Entrenamiento: ~[DURACIÓN] | Entrenamiento: [MÚSCULOS]
+Notas: [nota general de técnica y descansos, ej: "Descansos 90-120 s compuestos / 60-90 s aislados. Técnica primero."]
+⏰ Calentamiento (8-10 min)
+🔄 [descripción calentamiento]
+
+1. [Nombre ejercicio] | [N] series × [reps] reps
+   💪 Recomendado: [peso recomendado en kg]
+   📝 [indicación técnica breve]
+2. [Nombre ejercicio] | [N] series × [reps] reps
+   💪 Recomendado: [peso]
+   📝 [técnica]
+[continuar para todos los ejercicios]
+
+⏰ Enfriamiento (5 min)
+🔄 [descripción enfriamiento]
+
+🔥 Notas finales:
+- [consejo 1]
+- [consejo 2]
+
+REGLAS:
+- Siempre usa el formato "N series × X-Y reps" con el símbolo ×
+- Los pesos deben ser realistas para nivel indicado
+- Incluye 5-7 ejercicios principales
+- No uses markdown (**, ##, etc.)`;
+
+let grokParsedBuf = null;
+
+async function generateWithGrok(){
+  const key = document.getElementById('grok-key').value.trim() || loadGrokKey();
+  if(!key){
+    setGrokStatus('Guarda tu API key de xAI primero', 'error'); return;
+  }
+
+  const muscle   = document.getElementById('gk-muscle').value;
+  const duration = document.getElementById('gk-duration').value;
+  const level    = document.getElementById('gk-level').value;
+  const equip    = document.getElementById('gk-equip').value;
+  const notes    = document.getElementById('gk-notes').value.trim();
+
+  const days = ['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
+  const dayName = days[new Date().getDay()];
+  const dayNum  = new Date().getDate();
+
+  const userMsg = `Diseña una rutina de gimnasio con estos parámetros:
+- Músculos: ${muscle}
+- Duración: ${duration}
+- Nivel: ${level}
+- Equipo: ${equip}
+- Fecha: ${dayName} ${dayNum}
+${notes ? `- Notas adicionales: ${notes}` : ''}
+
+Responde SOLO con el texto de la rutina en el formato exacto del sistema.`;
+
+  // UI: loading state
+  const btn = document.getElementById('grok-gen-btn');
+  const lbl = document.getElementById('grok-gen-label');
+  btn.disabled = true; btn.classList.add('loading');
+  lbl.innerHTML = '<div class="grok-spin"></div> Generando con Grok…';
+  setGrokStatus('Conectando con xAI…', 'loading');
+  document.getElementById('grok-preview-wrap').style.display = 'none';
+  document.getElementById('grok-raw-wrap').style.display = 'none';
+
+  try{
+    const res = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`
+      },
+      body: JSON.stringify({
+        model: 'grok-3-mini',
+        max_tokens: 1800,
+        temperature: 0.7,
+        messages: [
+          { role: 'system', content: GROK_SYSTEM },
+          { role: 'user',   content: userMsg }
+        ]
+      })
+    });
+
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content || '';
+
+    // show raw
+    document.getElementById('grok-raw-text').textContent = text;
+    document.getElementById('grok-raw-wrap').style.display = 'block';
+
+    // parse
+    grokParsedBuf = parseMessage(text);
+    const exs = grokParsedBuf.exercises;
+
+    if(!exs.length){
+      setGrokStatus('Grok respondió pero no encontré ejercicios con el formato esperado. Revisa la respuesta abajo.', 'error');
+      document.getElementById('grok-raw-text').classList.add('show');
+      return;
+    }
+
+    // show preview
+    setGrokStatus(`✓ ${exs.length} ejercicios generados por Grok`, 'ok');
+    document.getElementById('grok-preview-title').textContent = grokParsedBuf.name || `Rutina ${muscle}`;
+    document.getElementById('grok-preview-list').innerHTML = exs.map((ex,i)=>`
+      <div class="prev-ex">
+        <div class="prev-ex-n">${i+1}</div>
+        <div class="prev-ex-name">${ex.name}</div>
+        <div class="prev-ex-meta">${ex.sets}×${ex.reps}${ex.weight?' · '+ex.weight:''}</div>
+      </div>`).join('');
+    document.getElementById('grok-preview-wrap').style.display = 'block';
+
+    // save key if not saved yet
+    localStorage.setItem(GROK_KEY_SK, key);
+
+  } catch(e){
+    setGrokStatus('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.classList.remove('loading');
+    lbl.textContent = '⚡ Generar rutina con Grok';
+  }
+}
+
+function setGrokStatus(msg, type=''){
+  const el = document.getElementById('grok-status');
+  el.textContent = msg;
+  el.className = 'grok-status' + (type ? ' '+type : '');
+}
+
+function startFromGrok(){
+  if(!grokParsedBuf || !grokParsedBuf.exercises.length) return;
+  parsedBuf = grokParsedBuf;
+  session = buildSession(grokParsedBuf); save(); showTracker(true);
+}
+
+function goEditGrok(){
+  if(!grokParsedBuf) return;
+  parsedBuf = grokParsedBuf;
+  goEditParsed();
+  switchTab('manual');
+}
+
 /* ── DEVICE DETECTION ── */
 function isDesktop(){
   return window.matchMedia('(pointer:fine)').matches && window.innerWidth >= 768;
@@ -1415,6 +1729,7 @@ function loadFromCode(){
 
 /* ── INIT ── */
 (function(){
+  loadGrokKey();
   if(loadSaved()&&session){ showSetup(); }
 })();
 </script>
