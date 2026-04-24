@@ -226,6 +226,38 @@ body{max-width:480px;margin:0 auto;position:relative}
 .btm-btn:active{opacity:.7}
 .btm-btn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;flex:1.5}
 
+/* ── SENSACIONES MODAL ── */
+#sens-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:800;align-items:flex-end;justify-content:center}
+#sens-modal.show{display:flex}
+.sens-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px 14px 0 0;width:100%;max-width:480px;padding:22px 22px 44px;animation:slideUp .22s ease}
+.sens-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:4px}
+.sens-sub{font-size:13px;color:var(--text-mid);margin-bottom:20px}
+.sens-question{margin-bottom:18px}
+.sens-q-label{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px}
+.sens-options{display:flex;gap:6px;flex-wrap:wrap}
+.sens-opt{padding:7px 13px;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;font-size:13px;cursor:pointer;transition:all .15s;user-select:none}
+.sens-opt.selected{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+.sens-open-label{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:6px;margin-top:18px}
+.sens-open-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 11px;resize:none;outline:none;min-height:56px;line-height:1.5}
+.sens-open-input:focus{border-color:var(--accent)}
+.sens-open-input::placeholder{color:var(--text-dim)}
+.sens-gen-btn{width:100%;padding:13px;background:var(--accent);border:none;border-radius:var(--rs);color:#000;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:16px}
+
+/* ── GROK REPORT MODAL ── */
+#report-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:900;align-items:flex-end;justify-content:center}
+#report-modal.show{display:flex}
+.report-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px 14px 0 0;width:100%;max-width:480px;padding:20px 20px 44px;animation:slideUp .22s ease;max-height:85vh;display:flex;flex-direction:column}
+.report-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0}
+.report-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px}
+.report-close{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text-dim);font-size:13px;padding:3px 9px;cursor:pointer}
+.report-hint{font-size:12px;color:var(--text-mid);margin-bottom:10px;flex-shrink:0;line-height:1.5}
+.report-textarea{flex:1;min-height:220px;background:#000;border:1px solid var(--border2);border-radius:var(--rs);color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;padding:12px 13px;resize:none;outline:none;line-height:1.7;overflow-y:auto}
+.report-btns{display:flex;gap:8px;margin-top:12px;flex-shrink:0}
+.report-btn{flex:1;padding:11px;border-radius:var(--rs);font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none}
+.report-btn-copy{background:var(--surface3);color:var(--text-mid);border:1px solid var(--border2) !important;border:none}
+.report-btn-copy.copied{background:var(--done-bg);color:var(--done-text)}
+.report-btn-grok{background:#000;color:var(--accent);border:1px solid var(--border2) !important;border:none}
+
 /* finish */
 #finish-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:40px}
 #finish-overlay.show{display:flex}
@@ -651,9 +683,69 @@ textarea{-webkit-appearance:none}
     <div class="fo-stat"><div class="fo-stat-n" id="fo-sets">0</div><div class="fo-stat-l">Series ✓</div></div>
   </div>
   <div class="fo-btns">
-    <button class="fo-btn" onclick="closeFinish()">Cerrar</button>
-    <button class="fo-btn accent" onclick="openSummary()">📊 Ver resumen</button>
+    <button class="fo-btn accent" onclick="openSensaciones()">📝 Resumen para Grok</button>
+    <button class="fo-btn" onclick="openSummary()">📊 Ver gráficas</button>
     <button class="fo-btn" onclick="newRoutine()">Nueva rutina</button>
+  </div>
+</div>
+
+<!-- ══ SENSACIONES MODAL ══ -->
+<div id="sens-modal">
+  <div class="sens-box">
+    <div class="sens-title">¿Cómo te fue?</div>
+    <div class="sens-sub">Responde rápido — se incluye en el resumen para Grok</div>
+
+    <div class="sens-question">
+      <div class="sens-q-label">💪 Pump / esfuerzo general</div>
+      <div class="sens-options" id="sens-pump">
+        <div class="sens-opt" onclick="selectSens('pump',this,'Suave')">😴 Suave</div>
+        <div class="sens-opt" onclick="selectSens('pump',this,'Bien')">✅ Bien</div>
+        <div class="sens-opt" onclick="selectSens('pump',this,'Intenso')">🔥 Intenso</div>
+        <div class="sens-opt" onclick="selectSens('pump',this,'Al límite')">💀 Al límite</div>
+      </div>
+    </div>
+
+    <div class="sens-question">
+      <div class="sens-q-label">⚡ Energía durante el entreno</div>
+      <div class="sens-options" id="sens-energia">
+        <div class="sens-opt" onclick="selectSens('energia',this,'Muy baja')">🔋 Muy baja</div>
+        <div class="sens-opt" onclick="selectSens('energia',this,'Regular')">🟡 Regular</div>
+        <div class="sens-opt" onclick="selectSens('energia',this,'Buena')">🟢 Buena</div>
+        <div class="sens-opt" onclick="selectSens('energia',this,'Excelente')">⚡ Excelente</div>
+      </div>
+    </div>
+
+    <div class="sens-question">
+      <div class="sens-q-label">🩹 Molestias o dolor</div>
+      <div class="sens-options" id="sens-dolor">
+        <div class="sens-opt" onclick="selectSens('dolor',this,'Ninguna')">✅ Ninguna</div>
+        <div class="sens-opt" onclick="selectSens('dolor',this,'Leve incomodidad')">🟡 Leve</div>
+        <div class="sens-opt" onclick="selectSens('dolor',this,'Dolor moderado')">🟠 Moderado</div>
+        <div class="sens-opt" onclick="selectSens('dolor',this,'Dolor fuerte')">🔴 Fuerte</div>
+      </div>
+    </div>
+
+    <div class="sens-open-label">Algo más que quieras agregar</div>
+    <textarea class="sens-open-input" id="sens-extra"
+      placeholder="Ej: me costó la última serie de sentadilla, subí el peso en press banca, me faltó dormir..."></textarea>
+
+    <button class="sens-gen-btn" onclick="generateGrokReport()">Generar resumen para Grok →</button>
+  </div>
+</div>
+
+<!-- ══ GROK REPORT MODAL ══ -->
+<div id="report-modal">
+  <div class="report-box">
+    <div class="report-head">
+      <div class="report-title">Resumen para Grok</div>
+      <button class="report-close" onclick="closeReport()">✕</button>
+    </div>
+    <div class="report-hint">Copia este texto y pégaselo a Grok en tu chat de rutinas para que lleve el registro y ajuste la próxima sesión.</div>
+    <textarea class="report-textarea" id="report-text" readonly></textarea>
+    <div class="report-btns">
+      <button class="report-btn report-btn-copy" id="report-copy-btn" onclick="copyReport()">Copiar texto</button>
+      <button class="report-btn report-btn-grok" onclick="openGrokChat()">Abrir Grok 𝕏</button>
+    </div>
   </div>
 </div>
 
@@ -1725,6 +1817,121 @@ function loadFromCode(){
   resEl.className='code-load-result ok';
   session=s; save();
   setTimeout(()=>{ curSlide=1; showTracker(false); },500);
+}
+
+/* ════════════════════════════════════════
+   SENSACIONES + REPORTE PARA GROK
+════════════════════════════════════════ */
+const sensState = { pump:'', energia:'', dolor:'' };
+
+function openSensaciones(){
+  // reset
+  sensState.pump=''; sensState.energia=''; sensState.dolor='';
+  document.querySelectorAll('.sens-opt').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('sens-extra').value='';
+  document.getElementById('sens-modal').classList.add('show');
+}
+
+function selectSens(key, el, val){
+  sensState[key] = val;
+  el.closest('.sens-options').querySelectorAll('.sens-opt')
+    .forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function generateGrokReport(){
+  document.getElementById('sens-modal').classList.remove('show');
+  const extra = document.getElementById('sens-extra').value.trim();
+
+  const exs   = session.exercises;
+  const done  = exs.filter(e=>e.done);
+  const vol   = calcTotalVolume();
+  const date  = session.date || today();
+
+  // ── build report text ──
+  let lines = [];
+
+  lines.push(`📋 REGISTRO DE ENTRENAMIENTO`);
+  lines.push(`${session.name} — ${date}`);
+  lines.push(`Duración estimada: ${session.duration||'—'} | Músculos: ${session.muscle||'—'}`);
+  lines.push('');
+
+  lines.push(`✅ EJERCICIOS REALIZADOS (${done.length}/${exs.length}):`);
+  lines.push('');
+
+  exs.forEach((ex, idx) => {
+    const confirmedSets = ex.sets_data.filter(s => s.confirmed);
+    const status = ex.done ? '✅' : '⬜';
+
+    lines.push(`${status} ${idx+1}. ${ex.name}`);
+    lines.push(`   Prescrito: ${ex.sets} series × ${ex.reps} reps${ex.weight ? ' · '+ex.weight : ''}`);
+
+    if(confirmedSets.length){
+      const setsDetail = confirmedSets.map((s,i) => {
+        const r = s.reps || ex.reps;
+        const w = s.weight ? `${s.weight}kg` : '—';
+        return `Serie ${i+1}: ${r} reps · ${w}`;
+      }).join(' | ');
+      lines.push(`   Realizado: ${setsDetail}`);
+
+      // max weight
+      const maxW = Math.max(...confirmedSets.map(s=>parseFloat(s.weight)||0));
+      if(maxW > 0) lines.push(`   Peso máximo: ${maxW}kg`);
+    } else {
+      lines.push(`   Realizado: omitido`);
+    }
+
+    if(ex.notes) lines.push(`   Sensación: ${ex.notes}`);
+    lines.push('');
+  });
+
+  if(vol > 0){
+    lines.push(`📊 VOLUMEN TOTAL: ${vol}kg (reps × peso)`);
+    lines.push('');
+  }
+
+  lines.push(`💬 SENSACIONES GENERALES:`);
+  if(sensState.pump)    lines.push(`• Esfuerzo / Pump: ${sensState.pump}`);
+  if(sensState.energia) lines.push(`• Energía: ${sensState.energia}`);
+  if(sensState.dolor)   lines.push(`• Molestias: ${sensState.dolor}`);
+  if(extra)             lines.push(`• Notas: ${extra}`);
+  if(!sensState.pump && !sensState.energia && !sensState.dolor && !extra){
+    lines.push(`• Sin notas adicionales`);
+  }
+  lines.push('');
+
+  lines.push(`❓ PREGUNTA PARA GROK:`);
+  lines.push(`Con base en este registro, ¿qué ajustes recomiendas para la próxima sesión de ${session.muscle||'este grupo muscular'}? ¿Subo algún peso, cambio reps, o hay algo que deba corregir en técnica?`);
+
+  const reportText = lines.join('\n');
+  document.getElementById('report-text').value = reportText;
+  document.getElementById('report-modal').classList.add('show');
+}
+
+function closeReport(){
+  document.getElementById('report-modal').classList.remove('show');
+}
+
+function copyReport(){
+  const text = document.getElementById('report-text').value;
+  const btn  = document.getElementById('report-copy-btn');
+  const done = () => {
+    btn.textContent = '✓ Copiado'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='Copiar texto'; btn.classList.remove('copied'); }, 2200);
+    toast('✓ Texto copiado — pégalo en Grok');
+  };
+  navigator.clipboard.writeText(text).then(done).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); done();
+  });
+}
+
+function openGrokChat(){
+  // copy first, then open
+  const text = document.getElementById('report-text').value;
+  navigator.clipboard.writeText(text).catch(()=>{});
+  window.open('https://x.com/i/grok', '_blank');
 }
 
 /* ── INIT ── */
